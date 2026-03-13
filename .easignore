@@ -1,0 +1,8 @@
+# Agent directories (contains symlinks that cause permission errors)
+.agents/
+.roo/
+
+# Local development
+.env*.local
+node_modules/
+.expo/
