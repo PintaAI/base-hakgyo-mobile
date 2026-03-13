@@ -1,18 +1,21 @@
-import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
+import { Platform, Text as RNText, StyleSheet, type TextProps } from 'react-native';
 
 import { Fonts, ThemeColor } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-export type ThemedTextProps = TextProps & {
+export type TextPropsType = TextProps & {
   type?: 'default' | 'title' | 'small' | 'smallBold' | 'subtitle' | 'link' | 'linkPrimary' | 'code';
   themeColor?: ThemeColor;
+  marginTop?: number;
 };
 
-export function ThemedText({ style, type = 'default', themeColor, ...rest }: ThemedTextProps) {
+export function Text({ style, type = 'default', themeColor, marginTop, ...rest }: TextPropsType) {
   const theme = useTheme();
 
+  const spacingStyle = marginTop ? { marginTop } : {};
+
   return (
-    <Text
+    <RNText
       style={[
         { color: theme[themeColor ?? 'text'] },
         type === 'default' && styles.default,
@@ -23,6 +26,7 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
         type === 'link' && styles.link,
         type === 'linkPrimary' && styles.linkPrimary,
         type === 'code' && styles.code,
+        spacingStyle,
         style,
       ]}
       {...rest}
@@ -48,26 +52,47 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 48,
-    fontWeight: 600,
-    lineHeight: 52,
+    lineHeight: 56,
+    fontWeight: 700,
+    letterSpacing: -0.5,
+    ...Platform.select({
+      ios: {
+        fontFamily: Fonts.sans,
+      },
+      default: {},
+    }),
   },
   subtitle: {
-    fontSize: 32,
-    lineHeight: 44,
+    fontSize: 20,
+    lineHeight: 28,
     fontWeight: 600,
+    letterSpacing: -0.2,
+    ...Platform.select({
+      ios: {
+        fontFamily: Fonts.sans,
+      },
+      default: {},
+    }),
   },
   link: {
-    lineHeight: 30,
-    fontSize: 14,
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: 500,
+    textDecorationLine: 'underline',
   },
   linkPrimary: {
-    lineHeight: 30,
-    fontSize: 14,
-    color: '#3c87f7',
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: 600,
+    textDecorationLine: 'underline',
   },
   code: {
-    fontFamily: Fonts.mono,
-    fontWeight: Platform.select({ android: 700 }) ?? 500,
-    fontSize: 12,
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: 400,
+    fontFamily: Platform.select({
+      ios: Fonts.mono,
+      default: 'monospace',
+    }),
   },
 });

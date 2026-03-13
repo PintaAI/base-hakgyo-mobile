@@ -6,8 +6,8 @@ import { Path, Svg } from 'react-native-svg';
 
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { ThemedText } from './themed-text';
-import { ThemedView } from './themed-view';
+import { Text } from './text';
+import { View as ThemedView } from './view';
 
 interface AuthCardProps {
   title?: string;
@@ -101,12 +101,12 @@ export function AuthCard({
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>
+      <Text type="title" style={styles.title}>
         {title}
-      </ThemedText>
-      <ThemedText type="default" style={styles.subtitle}>
+      </Text>
+      <Text type="default" style={styles.subtitle}>
         {subtitle}
-      </ThemedText>
+      </Text>
 
       <View style={[styles.signInMethodToggle, { backgroundColor: theme.backgroundElement }]}>
         <Pressable
@@ -119,12 +119,12 @@ export function AuthCard({
           ]}
           onPress={() => setSignInMethod('google')}
         >
-          <ThemedText
+          <Text
             themeColor={signInMethod === 'google' ? 'text' : 'textSecondary'}
             style={styles.toggleButtonText}
           >
             Google
-          </ThemedText>
+          </Text>
         </Pressable>
         <Pressable
           style={[
@@ -136,12 +136,12 @@ export function AuthCard({
           ]}
           onPress={() => setSignInMethod('credentials')}
         >
-          <ThemedText
+          <Text
             themeColor={signInMethod === 'credentials' ? 'text' : 'textSecondary'}
             style={styles.toggleButtonText}
           >
             Email
-          </ThemedText>
+          </Text>
         </Pressable>
       </View>
 
@@ -160,9 +160,9 @@ export function AuthCard({
               <View style={styles.googleIcon}>
                 <GoogleGIcon />
               </View>
-              <ThemedText style={styles.buttonText}>
+              <Text style={styles.buttonText}>
                 {isLoading ? 'Signing in...' : 'Continue with Google'}
-              </ThemedText>
+              </Text>
             </View>
           </Pressable>
         ) : (
@@ -212,9 +212,9 @@ export function AuthCard({
               onPress={handleCredentialSignIn}
               disabled={isLoading}
             >
-              <ThemedText themeColor="background" style={styles.signInButtonText}>
+              <Text themeColor="background" style={styles.signInButtonText}>
                 {isLoading ? 'Signing in...' : 'Sign In'}
-              </ThemedText>
+              </Text>
             </Pressable>
           </View>
         )}

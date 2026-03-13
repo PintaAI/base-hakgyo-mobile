@@ -5,7 +5,6 @@ import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 
 import { AuthCard } from '@/components/auth-card';
-import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 
 export default function AuthScreen() {
@@ -42,14 +41,14 @@ export default function AuthScreen() {
 
   if (!isInitialized) {
     return (
-      <ThemedView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.loadingContainer} />
-      </ThemedView>
+      </View>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.content}>
         <AuthCard
           title="Welcome to Hakgyo"
@@ -58,7 +57,7 @@ export default function AuthScreen() {
           onError={handleAuthError}
         />
       </View>
-    </ThemedView>
+    </View>
   );
 }
 
