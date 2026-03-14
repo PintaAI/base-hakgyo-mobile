@@ -1,27 +1,14 @@
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { router } from 'expo-router';
 import { useAuth } from 'hakgyo-expo-sdk';
-import React, { useEffect, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 
 import { AuthCard } from '@/components/auth-card';
-import { Spacing } from '@/constants/theme';
 
 export default function AuthScreen() {
   const { user, session } = useAuth();
-  const [isInitialized, setIsInitialized] = useState(false);
 
   const isAuthenticated = !!user && !!session;
-
-  useEffect(() => {
-    // Configure Google Sign-In
-    GoogleSignin.configure({
-      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-      iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-      offlineAccess: true,
-    });
-    setIsInitialized(true);
-  }, []);
 
   useEffect(() => {
     // Redirect if already authenticated
@@ -39,41 +26,25 @@ export default function AuthScreen() {
     Alert.alert('Sign In Error', error.message);
   };
 
-  if (!isInitialized) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.loadingContainer} />
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <AuthCard
-          title="Welcome to Hakgyo"
-          subtitle="Sign in to access your learning materials"
-          onSuccess={handleAuthSuccess}
-          onError={handleAuthError}
-        />
-      </View>
-    </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1"
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="flex-1 justify-center p-2">
+          <AuthCard
+            title="Welcome to Hakgyo"
+            subtitle="Sign in to access your learning materials"
+            onSuccess={handleAuthSuccess}
+            onError={handleAuthError}
+          />
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: Spacing.four,
-  },
-  content: {
-    width: '100%',
-    maxWidth: 400,
-  },
-  loadingContainer: {
-    width: '100%',
-    height: '100%',
-  },
-});

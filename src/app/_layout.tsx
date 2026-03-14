@@ -1,10 +1,10 @@
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
-import React from 'react';
-import { useColorScheme } from 'react-native';
 import { AuthProvider, initSDK } from 'hakgyo-expo-sdk';
-import { Platform } from 'react-native';
-
+import React from 'react';
+import { Platform, useColorScheme } from 'react-native';
+import "../global.css";
 // Initialize SDK
 initSDK({
   baseURL: 'https://hakgyo.vercel.app',
@@ -29,13 +29,40 @@ initSDK({
   },
 });
 
+// Configure Google Sign-In right after SDK initialization
+GoogleSignin.configure({
+  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+  iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+  offlineAccess: true,
+});
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  
+   
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AuthProvider>
-        <Stack screenOptions={{ headerShown: false }} />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen
+            name="auth"
+            options={{
+              headerShown: false,
+              title: 'Sign In',
+              presentation: 'formSheet',
+              sheetGrabberVisible: true,
+              sheetAllowedDetents: [0.5, 1.0],
+            }}
+          />
+          <Stack.Screen
+            name="color"
+            options={{
+              headerShown: false,
+              title: 'Colors',
+              presentation: 'card',
+              animation: 'ios_from_right',
+            }}
+          />
+        </Stack>
       </AuthProvider>
     </ThemeProvider>
   );

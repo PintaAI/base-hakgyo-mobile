@@ -1,13 +1,12 @@
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
+import FontAwesomeBrands from '@react-native-vector-icons/fontawesome-free-brands';
 import { useAuth } from 'hakgyo-expo-sdk';
 import React from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
-import { Path, Svg } from 'react-native-svg';
+import { Pressable, Text, View } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { Text } from './text';
-import { View as ThemedView } from './view';
+import { Input } from './input';
 
 interface AuthCardProps {
   title?: string;
@@ -25,9 +24,9 @@ export function AuthCard({
   const { signInWithEmail, signInWithGoogle } = useAuth();
   const theme = useTheme();
   const [isLoading, setIsLoading] = React.useState(false);
-  const [signInMethod, setSignInMethod] = React.useState<'google' | 'credentials'>('google');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [showEmailForm, setShowEmailForm] = React.useState(false);
 
   const handleGoogleSignIn = async () => {
     try {
@@ -100,84 +99,49 @@ export function AuthCard({
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <Text type="title" style={styles.title}>
+    <View className="p-8 rounded-2xl gap-2">
+      <Text className="text-4xl font-bold text-center text-foreground">
         {title}
       </Text>
-      <Text type="default" style={styles.subtitle}>
+      <Text className="text-base text-center opacity-70 text-foreground">
         {subtitle}
       </Text>
 
-      <View style={[styles.signInMethodToggle, { backgroundColor: theme.backgroundElement }]}>
-        <Pressable
-          style={[
-            styles.toggleButton,
-            signInMethod === 'google' && [
-              styles.toggleButtonActive,
-              { backgroundColor: theme.backgroundSelected },
-            ],
-          ]}
-          onPress={() => setSignInMethod('google')}
-        >
-          <Text
-            themeColor={signInMethod === 'google' ? 'text' : 'textSecondary'}
-            style={styles.toggleButtonText}
-          >
-            Google
-          </Text>
-        </Pressable>
-        <Pressable
-          style={[
-            styles.toggleButton,
-            signInMethod === 'credentials' && [
-              styles.toggleButtonActive,
-              { backgroundColor: theme.backgroundSelected },
-            ],
-          ]}
-          onPress={() => setSignInMethod('credentials')}
-        >
-          <Text
-            themeColor={signInMethod === 'credentials' ? 'text' : 'textSecondary'}
-            style={styles.toggleButtonText}
-          >
-            Email
-          </Text>
-        </Pressable>
-      </View>
-
-      <View style={styles.buttonContainer}>
-        {signInMethod === 'google' ? (
-          <Pressable
-            style={[
-              styles.googleButton,
-              { backgroundColor: theme.background, borderColor: theme.backgroundSelected },
-              isLoading && styles.buttonDisabled,
-            ]}
-            onPress={handleGoogleSignIn}
-            disabled={isLoading}
-          >
-            <View style={styles.buttonContent}>
-              <View style={styles.googleIcon}>
-                <GoogleGIcon />
-              </View>
-              <Text style={styles.buttonText}>
-                {isLoading ? 'Signing in...' : 'Continue with Google'}
+      <View className="gap-3 mt-2">
+        {!showEmailForm ? (
+          <>
+            <Text className="text-center text-sm text-muted-foreground mb-2">
+              Continue with
+            </Text>
+            <Pressable
+              className="rounded-lg p-3 border flex-row items-center justify-center gap-2 shadow-sm"
+              style={{ backgroundColor: theme.background, borderColor: theme.backgroundSelected, opacity: isLoading ? 0.6 : 1 }}
+              onPress={handleGoogleSignIn}
+              disabled={isLoading}
+            >
+              <FontAwesomeBrands name="google" size={20} color={theme.text} />
+              <Text className="text-base font-semibold text-foreground">
+                {isLoading ? 'Signing in...' : 'Google'}
               </Text>
-            </View>
-          </Pressable>
+            </Pressable>
+            <Pressable
+              className="rounded-lg p-3 flex-row items-center justify-center gap-2 shadow-sm"
+              style={{ backgroundColor: theme.text, opacity: isLoading ? 0.6 : 1 }}
+              onPress={() => setShowEmailForm(true)}
+              disabled={isLoading}
+            >
+              <FontAwesome name="envelope" size={20} color={theme.background} />
+              <Text className="text-base font-semibold text-background">
+                Email
+              </Text>
+            </Pressable>
+          </>
         ) : (
-          <View style={styles.credentialsContainer}>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: theme.background,
-                  borderColor: theme.backgroundSelected,
-                  color: theme.text,
-                },
-              ]}
+          <View className="gap-3">
+            <Input
+              variant="default"
+              size="md"
               placeholder="Email"
-              placeholderTextColor={theme.textSecondary}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -185,17 +149,10 @@ export function AuthCard({
               keyboardType="email-address"
               editable={!isLoading}
             />
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  backgroundColor: theme.background,
-                  borderColor: theme.backgroundSelected,
-                  color: theme.text,
-                },
-              ]}
+            <Input
+              variant="default"
+              size="md"
               placeholder="Password"
-              placeholderTextColor={theme.textSecondary}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -203,137 +160,32 @@ export function AuthCard({
               autoCorrect={false}
               editable={!isLoading}
             />
-            <Pressable
-              style={[
-                styles.signInButton,
-                { backgroundColor: theme.text },
-                isLoading && styles.buttonDisabled,
-              ]}
-              onPress={handleCredentialSignIn}
-              disabled={isLoading}
-            >
-              <Text themeColor="background" style={styles.signInButtonText}>
-                {isLoading ? 'Signing in...' : 'Sign In'}
-              </Text>
-            </Pressable>
+            <View className="flex-row gap-2">
+              <Pressable
+                className="flex-1 rounded-lg p-3 border items-center justify-center"
+                style={{ borderColor: theme.backgroundSelected }}
+                onPress={() => setShowEmailForm(false)}
+                disabled={isLoading}
+              >
+                <Text className="text-base font-medium text-muted-foreground">
+                  Back
+                </Text>
+              </Pressable>
+              <Pressable
+                className="flex-1 rounded-lg p-3 items-center justify-center shadow-md"
+                style={{ backgroundColor: theme.text, opacity: isLoading ? 0.6 : 1 }}
+                onPress={handleCredentialSignIn}
+                disabled={isLoading}
+              >
+                <Text className="text-base font-semibold text-background">
+                  {isLoading ? 'Signing in...' : 'Sign In'}
+                </Text>
+              </Pressable>
+            </View>
           </View>
         )}
       </View>
-    </ThemedView>
+    </View>
   );
 }
 
-function GoogleGIcon() {
-  return (
-    <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-        fill="#4285F4"
-      />
-      <Path
-        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-        fill="#34A853"
-      />
-      <Path
-        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-        fill="#FBBC05"
-      />
-      <Path
-        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-        fill="#EA4335"
-      />
-    </Svg>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    padding: Spacing.five,
-    borderRadius: Spacing.three,
-    gap: Spacing.two,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  subtitle: {
-    textAlign: 'center',
-    opacity: 0.7,
-  },
-  signInMethodToggle: {
-    flexDirection: 'row',
-    borderRadius: Spacing.two,
-    padding: Spacing.half,
-    marginBottom: Spacing.two,
-  },
-  toggleButton: {
-    flex: 1,
-    paddingVertical: Spacing.two,
-    alignItems: 'center',
-    borderRadius: Spacing.two,
-  },
-  toggleButtonActive: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  toggleButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  buttonContainer: {
-    gap: Spacing.three,
-    marginTop: Spacing.two,
-  },
-  googleButton: {
-    borderRadius: Spacing.two,
-    padding: Spacing.three,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.two,
-  },
-  googleIcon: {
-    width: 24,
-    height: 24,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  credentialsContainer: {
-    gap: Spacing.three,
-  },
-  input: {
-    borderRadius: Spacing.two,
-    padding: Spacing.three,
-    borderWidth: 1,
-    fontSize: 16,
-  },
-  signInButton: {
-    borderRadius: Spacing.two,
-    padding: Spacing.three,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  signInButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

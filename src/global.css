@@ -1,8 +1,32 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css";
+ 
+@import "nativewind/theme";
 
-:root {
+/* Tailwind theme extensions with dark mode variants */
+@theme {
+  /* Light mode colors (default) */
+  --color-background: #ffffff;
+  --color-foreground: #000000;
+  --color-border: #e5e7eb;
+  --color-border-focus: #4b5563;
+  --color-input: #f9fafb;
+  --color-input-focus: #ffffff;
+  --color-muted: #f3f4f6;
+  --color-muted-foreground: #6b7280;
+  --color-destructive: #ef4444;
+  --color-ring: #4b5563;
+
+  /* Primary, Secondary, Accent colors */
+  --color-primary: #374151;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #6b7280;
+  --color-secondary-foreground: #ffffff;
+  --color-accent: #4b5563;
+  --color-accent-foreground: #ffffff;
+
+  /* Fonts */
   --font-display:
     Spline Sans, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,
     Segoe UI Symbol, Noto Color Emoji;
@@ -10,4 +34,28 @@
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
   --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
   --font-serif: Georgia, 'Times New Roman', serif;
+}
+
+/* Dark mode colors using light-dark() function */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #000000;
+    --color-foreground: #fafafa;
+    --color-border: #1a1a1a;
+    --color-border-focus: #9ca3af;
+    --color-input: #0d0d0d;
+    --color-input-focus: #000000;
+    --color-muted: #0f0f0f;
+    --color-muted-foreground: #737373;
+    --color-destructive: #ef4444;
+    --color-ring: #9ca3af;
+
+    /* Primary, Secondary, Accent colors for dark mode */
+    --color-primary: #d1d5db;
+    --color-primary-foreground: #000000;
+    --color-secondary: #9ca3af;
+    --color-secondary-foreground: #000000;
+    --color-accent: #6b7280;
+    --color-accent-foreground: #ffffff;
+  }
 }

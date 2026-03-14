@@ -1,9 +1,7 @@
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 
-import { Text } from '@/components/text';
-import { View as ViewComponent } from '@/components/view';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function ColorScreen() {
@@ -13,66 +11,53 @@ export default function ColorScreen() {
   const colorEntries = Object.entries(theme);
 
   return (
-    <ViewComponent style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text type="title" style={styles.title}>
+    <View className="flex-1 bg-background">
+      <ScrollView contentContainerClassName="p-4 pt-16">
+        <Text className="text-2xl font-bold text-foreground mb-2">
           Colors
         </Text>
-        <Text style={styles.subtitle}>
+        <Text className="text-muted-foreground mb-6">
           Current mode: {colorScheme ?? 'unknown'}
         </Text>
 
+        <View className="flex-row flex-wrap gap-2 mb-4">
+          <View className="flex-1  p-3 rounded-lg bg-primary">
+            <Text className="text-primary-foreground font-semibold">Primary</Text>
+          </View>
+          <View className="flex-1 p-3 rounded-lg bg-secondary">
+            <Text className="text-secondary-foreground font-semibold">Secondary</Text>
+          </View>
+          <View className="flex-1  p-3 rounded-lg bg-accent">
+            <Text className="text-accent-foreground font-semibold">Accent</Text>
+          </View>
+        </View>
+
+        <View className="flex-row flex-wrap gap-2 mb-4">
+          <View className="flex-1  p-3 rounded-lg bg-muted border border-border">
+            <Text className="text-muted-foreground font-medium">Muted</Text>
+          </View>
+          <View className="flex-1 p-3 rounded-lg bg-destructive">
+            <Text className="text-white font-semibold">Destructive</Text>
+          </View>
+        </View>
+
+        <Text className="text-lg font-semibold text-foreground mb-3 mt-4">
+          Theme Colors
+        </Text>
+
         {colorEntries.map(([name, value]) => (
-          <ViewComponent key={name} style={styles.colorRow}>
-            <ViewComponent style={[styles.colorBox, { backgroundColor: value }]} />
-            <ViewComponent style={styles.colorInfo}>
-              <Text type="smallBold">{name}</Text>
-              <Text type="small" style={styles.colorValue}>
-                {value}
-              </Text>
-            </ViewComponent>
-          </ViewComponent>
+          <View key={name} className="flex-row items-center mb-2 p-2 rounded-lg bg-card border border-border">
+            <View 
+              className="w-14 h-14 rounded-lg mr-3 border border-border/50"
+              style={{ backgroundColor: value }}
+            />
+            <View className="flex-1">
+              <Text className="font-semibold text-foreground">{name}</Text>
+              <Text className="text-sm text-muted-foreground mt-0.5">{value}</Text>
+            </View>
+          </View>
         ))}
       </ScrollView>
-    </ViewComponent>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: Spacing.three,
-    paddingTop: Spacing.six,
-  },
-  title: {
-    marginBottom: Spacing.two,
-  },
-  subtitle: {
-    marginBottom: Spacing.four,
-    opacity: 0.7,
-  },
-  colorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.two,
-    padding: Spacing.two,
-    borderRadius: 8,
-  },
-  colorBox: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: Spacing.two,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.1)',
-  },
-  colorInfo: {
-    flex: 1,
-  },
-  colorValue: {
-    opacity: 0.7,
-    marginTop: Spacing.half,
-  },
-});
