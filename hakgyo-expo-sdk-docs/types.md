@@ -256,13 +256,15 @@ Generic API response wrapper used by all API endpoints.
 ### PaginatedResponse<T>
 
 ```typescript
+export interface PaginatedMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
 export interface PaginatedResponse<T> extends ApiResponse<T[]> {
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
+  pagination: PaginatedMeta;
   streakInfo?: StreakInfo;
 }
 ```
@@ -484,6 +486,7 @@ export interface Kelas {
   author?: User;
   createdAt: string;
   updatedAt: string;
+  isEnrolled?: boolean;
 }
 ```
 
@@ -602,6 +605,15 @@ export interface VocabularyItem {
     description?: string;
     icon?: string;
     isPublic: boolean;
+    kelasVocabularySets?: Array<{
+      id: number;
+      kelasId: string;
+      vocabularySetId: number;
+      kelas?: {
+        id: string;
+        title: string;
+      };
+    }>;
   };
 }
 ```
@@ -620,6 +632,7 @@ A single vocabulary item with Korean-Indonesian translations.
 | `exampleSentences` | `string[]` | Example sentences |
 | `order` | `number` | Display order |
 | `creatorId` | `string` | Creator's user ID |
+| `collection` | `object?` | Collection details with optional `kelasVocabularySets` for class associations |
 
 ### VocabularyItemProgress
 
@@ -841,6 +854,7 @@ export interface Post {
   authorId: string;
   author?: User;
   kelasId?: number;
+  userLiked?: boolean;
 }
 ```
 

@@ -1,43 +1,71 @@
+import { Background } from '@/components';
+import { VocabSetCard } from '@/components/vocab-set-card';
 import { router } from 'expo-router';
-import React from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { vocabularyApi, VocabularySet } from 'hakgyo-expo-sdk';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 
 export default function VocabScreen() {
-  const insets = useSafeAreaInsets();
-  const vocabSets = [
-    { id: '1', name: 'Basic Words', count: 50 },
-    { id: '2', name: 'Advanced Vocabulary', count: 30 },
-    { id: '3', name: 'Business English', count: 25 },
-  ];
+  const [vocabSets, setVocabSets] = useState<VocabularySet[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handlePress = (id: string) => {
-    router.push({ pathname: '/(menu)/vocab/[id]' as const, params: { id } });
+  useEffect(() => {
+    fetchVocabSets();
+  }, []);
+
+  const fetchVocabSets = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await vocabularyApi.listSets({ limit: 50 });
+      console.log('API Response:', JSON.stringify(response, null, 2));
+      setVocabSets(response?.data ?? []);
+    } catch (err) {
+      setError('Failed to load vocabulary sets');
+      console.error('Error fetching vocab sets:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePress = (id: number) => {
+    router.push({ pathname: '/(menu)/vocab/[id]' as const, params: { id: String(id) } });
   };
 
   return (
-    <ScrollView
-      className="flex-1 bg-background"
-      contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
-    >
-      <View className="p-4">
+    <View className="flex-1 bg-background">
+      <Background />
+      <View className="px-4 pt-4">
         <Text className="text-2xl font-bold text-foreground">Vocabulary Sets</Text>
-        <Text className="mt-2 text-muted-foreground">Select a vocabulary set to study</Text>
-        
-        <View className="mt-4">
-          {vocabSets.map((set) => (
-            <Pressable
-              key={set.id}
-              className="p-4 mb-3 bg-muted rounded-lg"
-              onPress={() => handlePress(set.id)}
-            >
-              <Text className="text-lg font-semibold text-foreground">{set.name}</Text>
-              <Text className="mt-1 text-muted-foreground">{set.count} words</Text>
-            </Pressable>
-          ))}
-        </View>
+        <Text className="text-muted-foreground">Select a vocabulary set to study</Text>
       </View>
-    </ScrollView>
+
+      <ScrollView
+        className="flex-1"
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{ padding: 16, gap: 16 }}
+      >
+        {loading ? (
+          <ActivityIndicator size="large" className="mt-8" />
+        ) : error ? (
+          <View className="gap-2">
+            <Text className="text-destructive">{error}</Text>
+            <Pressable
+              className="p-2 bg-primary rounded-lg"
+              onPress={fetchVocabSets}
+            >
+              <Text className="text-primary-foreground text-center">Retry</Text>
+            </Pressable>
+          </View>
+        ) : vocabSets.length === 0 ? (
+          <Text className="text-muted-foreground">No vocabulary sets available</Text>
+        ) : (
+          vocabSets.map((set) => (
+            <VocabSetCard key={set.id} set={set} onPress={handlePress} />
+          ))
+        )}
+      </ScrollView>
+    </View>
   );
 }

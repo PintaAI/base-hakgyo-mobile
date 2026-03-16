@@ -1,8 +1,8 @@
+import { Colors } from '@/constants/theme';
 import EvilIcons from '@react-native-vector-icons/evil-icons';
 import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
 import { Tabs } from 'expo-router';
 import { useColorScheme } from 'react-native';
-import { Colors } from '@/constants/theme';
 
 export default function MenuLayout() {
   const colorScheme = useColorScheme();
@@ -10,12 +10,12 @@ export default function MenuLayout() {
 
   return (
     <Tabs
-      screenOptions={{
-        headerShown: true,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.mutedForeground,
-      }}
-    >
+        screenOptions={{
+          headerShown: true,
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.mutedForeground,
+        }}
+      >
       <Tabs.Screen
         name="index"
         options={{

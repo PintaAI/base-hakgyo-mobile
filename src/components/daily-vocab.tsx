@@ -1,19 +1,8 @@
 import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
-import { useAuth } from 'hakgyo-expo-sdk';
 import { useRouter } from 'expo-router';
+import { useAuth, vocabularyApi, VocabularyItem } from 'hakgyo-expo-sdk';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
-
-interface VocabularyItem {
-  id: number;
-  korean: string;
-  indonesian: string;
-  type: 'WORD' | 'SENTENCE' | 'IDIOM';
-  pos?: 'KATA_KERJA' | 'KATA_BENDA' | 'KATA_SIFAT' | 'KATA_KETERANGAN';
-  audioUrl?: string;
-  exampleSentences: string[];
-  order: number;
-}
 
 interface DailyVocabProps {
   take?: number;
@@ -37,15 +26,11 @@ export function DailyVocab({ take = 5 }: DailyVocabProps) {
       try {
         setLoading(true);
         setError(null);
-        // Dynamic import to avoid issues when SDK is not available
-        const { vocabularyApi } = await import('hakgyo-expo-sdk');
-        const dailyWords = await vocabularyApi.getDaily({
+        const response = await vocabularyApi.getDaily({
           userId: user.id,
           take,
         });
-        // Handle ApiResponse wrapper - extract data array
-        const vocabData = Array.isArray(dailyWords) ? dailyWords : dailyWords.data;
-        setVocabulary(vocabData || []);
+        setVocabulary(response.data || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load daily vocabulary');
       } finally {
