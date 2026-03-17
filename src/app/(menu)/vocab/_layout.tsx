@@ -24,6 +24,7 @@ export default function VocabLayout() {
           presentation: 'formSheet',
           sheetGrabberVisible: true,
           sheetAllowedDetents: [0.5, 1.0],
+          
         }}
       />
     </Stack>

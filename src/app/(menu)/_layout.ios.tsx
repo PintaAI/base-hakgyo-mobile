@@ -1,6 +1,6 @@
+import { Colors } from '@/constants/theme';
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useColorScheme } from 'react-native';
-import { Colors } from '@/constants/theme';
 
 export default function MenuLayout() {
   const colorScheme = useColorScheme();
@@ -9,7 +9,7 @@ export default function MenuLayout() {
   return (
     <NativeTabs tintColor={colors.primary}>
       <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Menu</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           sf={{ default: 'house', selected: 'house.fill' }}
           md="home"
@@ -20,6 +20,13 @@ export default function MenuLayout() {
         <NativeTabs.Trigger.Icon
           sf={{ default: 'book', selected: 'book.fill' }}
           md="book"
+        />
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="soal">
+        <NativeTabs.Trigger.Label>Soal</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
+          sf={{ default: 'questionmark.circle', selected: 'questionmark.circle.fill' }}
+          md="help"
         />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile/index">

@@ -24,7 +24,7 @@ export function VocabSetCard({ set, onPress }: VocabSetCardProps) {
 
   return (
     <Pressable
-      className="p-4 mb-3 bg-muted rounded-lg border border-border active:opacity-70"
+      className="p-4 bg-muted rounded-lg border shadow border-border active:opacity-70"
       onPress={() => onPress(set.id)}
     >
       <View className="flex-row items-start justify-between">

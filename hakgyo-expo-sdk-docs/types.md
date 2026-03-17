@@ -487,6 +487,22 @@ export interface Kelas {
   createdAt: string;
   updatedAt: string;
   isEnrolled?: boolean;
+  materis?: Array<{
+    id: number;
+    title: string;
+    order: number;
+    isDemo: boolean;
+  }>;
+  members?: Array<{
+    id: string;
+    name: string;
+    image?: string | null;
+  }>;
+  _count?: {
+    materis: number;
+    members: number;
+    completions: number;
+  };
 }
 ```
 
@@ -532,6 +548,9 @@ export interface Materi {
   kelas?: Kelas;
   createdAt: string;
   updatedAt: string;
+  _count?: {
+    completions: number;
+  };
 }
 ```
 
@@ -719,10 +738,21 @@ Attachment for a question (image, audio, etc.).
 ```typescript
 export interface KoleksiSoal {
   id: number;
-  title: string;
-  description?: string;
+  nama: string;
+  deskripsi?: string;
+  isPrivate?: boolean;
+  isDraft?: boolean;
+  userId?: string;
   createdAt: string;
   updatedAt: string;
+  user?: {
+    id: string;
+    name: string;
+    image?: string | null;
+  };
+  _count?: {
+    soals: number;
+  };
 }
 ```
 
@@ -754,6 +784,7 @@ export interface Tryout {
   koleksiSoalId: number;
   isActive: boolean;
   guruId: string;
+  kelasId?: number;
   createdAt: string;
   updatedAt: string;
   guru?: {
@@ -761,10 +792,17 @@ export interface Tryout {
     name: string;
     image?: string;
   };
+  kelas?: {
+    id: number;
+    title: string;
+  };
   koleksiSoal?: {
     id: number;
     nama: string;
     soals: Soares[];
+  };
+  _count?: {
+    participants: number;
   };
 }
 ```
@@ -855,6 +893,10 @@ export interface Post {
   author?: User;
   kelasId?: number;
   userLiked?: boolean;
+  _count?: {
+    comments: number;
+    likes: number;
+  };
 }
 ```
 
@@ -886,6 +928,24 @@ A post in the community feed.
 export interface Comment {
   id: number;
   content: string;
+  htmlContent?: string;
+  postId: number;
+  authorId: string;
+  parentId?: number | null;
+  createdAt: string;
+  updatedAt: string;
+  replyCount?: number;
+  likeCount?: number;
+  author?: {
+    id: string;
+    name: string;
+    image?: string;
+  };
+  replies?: Comment[];
+  _count?: {
+    likes: number;
+    replies: number;
+  };
 }
 ```
 

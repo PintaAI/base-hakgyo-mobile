@@ -5,9 +5,11 @@ import { AuthProvider, initSDK } from 'hakgyo-expo-sdk';
 import React from 'react';
 import { Platform, useColorScheme } from 'react-native';
 import "../global.css";
+import { BASE_URL } from '@/lib/config';
+
 // Initialize SDK
 initSDK({
-  baseURL: 'https://hakgyo.vercel.app',
+  baseURL: BASE_URL,
   auth: {
     storagePrefix: 'hakgyo_auth',
     sessionRefreshThreshold: 5,

@@ -317,10 +317,21 @@ Represents a question collection (bank).
 ```typescript
 interface KoleksiSoal {
   id: number;
-  title: string;
-  description?: string;
+  nama: string;
+  deskripsi?: string;
+  isPrivate?: boolean;
+  isDraft?: boolean;
+  userId?: string;
   createdAt: string;
   updatedAt: string;
+  user?: {
+    id: string;
+    name: string;
+    image?: string | null;
+  };
+  _count?: {
+    soals: number;
+  };
 }
 ```
 

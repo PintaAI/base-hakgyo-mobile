@@ -208,6 +208,9 @@ interface Materi {
   kelas?: Kelas;
   createdAt: string;
   updatedAt: string;
+  _count?: {
+    completions: number;
+  };
 }
 ```
 

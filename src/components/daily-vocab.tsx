@@ -2,7 +2,7 @@ import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
 import { useRouter } from 'expo-router';
 import { useAuth, vocabularyApi, VocabularyItem } from 'hakgyo-expo-sdk';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
 interface DailyVocabProps {
   take?: number;
@@ -85,45 +85,42 @@ export function DailyVocab({ take = 5 }: DailyVocabProps) {
   }
 
   return (
-    <View className="bg-card rounded-lg p-4">
-      <Text className="text-lg font-semibold text-foreground mb-3">Daily Vocabulary</Text>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {vocabulary.map((item) => (
-          <Pressable
-            key={item.id}
-            onPress={() => toggleExpand(item.id)}
-            className="p-3 mb-2 bg-muted rounded-lg"
-          >
-            <View className="flex-row justify-between items-center">
-              <View className="flex-1">
-                <Text className="text-lg font-medium text-foreground">{item.korean}</Text>
-                <Text className="text-sm text-muted-foreground">{item.indonesian}</Text>
-              </View>
-              <View className="flex-row items-center">
-                <View className="bg-primary/10 px-2 py-1 rounded mr-2">
-                  <Text className="text-xs text-primary font-medium">{item.type}</Text>
-                </View>
-                <FontAwesome
-                  name={expandedItem === item.id ? "chevron-up" : "chevron-down"}
-                  size={14}
-                  color="#6b7280"
-                />
-              </View>
+    <View className=" rounded-lg p-4">
+      {vocabulary.map((item) => (
+        <Pressable
+          key={item.id}
+          onPress={() => toggleExpand(item.id)}
+          className="p-3 mb-2 bg-muted/50 border border-border shadow-sm rounded-lg"
+        >
+          <View className="flex-row justify-between items-center">
+            <View className="flex-1">
+              <Text className="text-lg font-medium text-foreground">{item.korean}</Text>
+              <Text className="text-sm text-muted-foreground">{item.indonesian}</Text>
             </View>
-            
-            {expandedItem === item.id && item.exampleSentences.length > 0 && (
-              <View className="mt-3 pt-3 border-t border-border">
-                <Text className="text-xs text-muted-foreground mb-1">Examples:</Text>
-                {item.exampleSentences.map((sentence, index) => (
-                  <Text key={index} className="text-sm text-foreground italic">
-                    • {sentence}
-                  </Text>
-                ))}
+            <View className="flex-row items-center">
+              <View className="bg-primary/10 px-2 py-1 rounded mr-2">
+                <Text className="text-xs text-primary font-medium">{item.type}</Text>
               </View>
-            )}
-          </Pressable>
-        ))}
-      </ScrollView>
+              <FontAwesome
+                name={expandedItem === item.id ? "chevron-up" : "chevron-down"}
+                size={14}
+                color="#6b7280"
+              />
+            </View>
+          </View>
+          
+          {expandedItem === item.id && item.exampleSentences.length > 0 && (
+            <View className="mt-3 pt-3 border-t border-border">
+              <Text className="text-xs text-muted-foreground mb-1">Examples:</Text>
+              {item.exampleSentences.map((sentence, index) => (
+                <Text key={index} className="text-sm text-foreground italic">
+                  • {sentence}
+                </Text>
+              ))}
+            </View>
+          )}
+        </Pressable>
+      ))}
     </View>
   );
 }

@@ -1,21 +1,22 @@
 import { Background, MenuHeader } from '@/components';
-import { VocabSetCard } from '@/components/vocab-set-card';
+import { KoleksiSoalCard } from '@/components/koleksi-soal-card';
 import { router } from 'expo-router';
-import { useAuth, vocabularyApi, VocabularySet } from 'hakgyo-expo-sdk';
+import { KoleksiSoal, soalApi, useAuth } from 'hakgyo-expo-sdk';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function VocabScreen() {
+export default function soalScreen() {
   const { user } = useAuth();
-  const [vocabSets, setVocabSets] = useState<VocabularySet[]>([]);
+  const [collections, setCollections] = useState<KoleksiSoal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchVocabSets();
+    fetchCollections();
   }, [user?.id]);
 
-  const fetchVocabSets = async () => {
+  const fetchCollections = async () => {
     if (!user?.id) {
       setLoading(false);
       return;
@@ -24,24 +25,26 @@ export default function VocabScreen() {
     try {
       setLoading(true);
       setError(null);
-      const response = await vocabularyApi.listSets({ limit: 50 });
-      setVocabSets(response?.data ?? []);
+      const response = await soalApi.listCollections({ limit: 50 });
+      setCollections(response?.data ?? []);
     } catch (err) {
-      setError('Failed to load vocabulary sets');
-      console.error('Error fetching vocab sets:', err);
+      setError('Failed to load question collections');
+      console.error('Error fetching collections:', err);
     } finally {
       setLoading(false);
     }
   };
 
+  // Note: Detail page not yet implemented - will create /soal/[id] later
   const handlePress = (id: number) => {
-    router.push({ pathname: '/(menu)/vocab/[id]' as const, params: { id: String(id) } });
+    console.log('Navigate to collection:', id);
+    // router.push({ pathname: '/(menu)/soal/[id]' as const, params: { id: String(id) } });
   };
 
   return (
     <View className="flex-1 ">
       <Background />
-      <MenuHeader title="Vocabulary" subtitle="Select a vocabulary set to study" />
+      <MenuHeader title="Question Banks" subtitle="Select a question bank to practice" />  
         <ScrollView
           className="flex-1 pt-5"
           contentInsetAdjustmentBehavior="automatic"
@@ -51,7 +54,7 @@ export default function VocabScreen() {
           <ActivityIndicator size="large" className="mt-8" />
         ) : !user?.id ? (
           <View className="p-5 bg-card items-center border border-border rounded-lg mt-4">
-            <Text className="text-sm text-muted-foreground mb-3">Please sign in to access vocabulary sets</Text>
+            <Text className="text-sm text-muted-foreground mb-3">Please sign in to access question banks</Text>
             <Pressable
               onPress={() => router.push('/auth')}
               className="bg-primary px-4 py-3 rounded-lg"
@@ -64,16 +67,16 @@ export default function VocabScreen() {
             <Text className="text-destructive">{error}</Text>
             <Pressable
               className="p-2 bg-primary rounded-lg"
-              onPress={fetchVocabSets}
+              onPress={fetchCollections}
             >
               <Text className="text-primary-foreground text-center">Retry</Text>
             </Pressable>
           </View>
-        ) : vocabSets.length === 0 ? (
-          <Text className="text-muted-foreground">No vocabulary sets available</Text>
+        ) : collections.length === 0 ? (
+          <Text className="text-muted-foreground">No question collections available</Text>
         ) : (
-          vocabSets.map((set) => (
-            <VocabSetCard key={set.id} set={set} onPress={handlePress} />
+          collections.map((collection) => (
+            <KoleksiSoalCard key={collection.id} collection={collection} onPress={handlePress} />
           ))
         )}
         </ScrollView>

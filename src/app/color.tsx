@@ -42,6 +42,42 @@ export default function ColorScreen() {
         </View>
 
         <Text className="text-lg font-semibold text-foreground mb-3 mt-4">
+          Gradient Test (CSS)
+        </Text>
+
+        <View className="flex-row flex-wrap gap-2 mb-4">
+          <View
+            className="flex-1 p-4 rounded-lg"
+            style={{ experimental_backgroundImage: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+          >
+            <Text className="text-white font-semibold">Linear Gradient</Text>
+          </View>
+          <View
+            className="flex-1 p-4 rounded-lg"
+            style={{ experimental_backgroundImage: 'linear-gradient(to right, #f093fb 0%, #f5576c 100%)' }}
+          >
+            <Text className="text-white font-semibold">Pink Gradient</Text>
+          </View>
+        </View>
+
+        <View
+          className="p-4 rounded-lg mb-4"
+          style={{ experimental_backgroundImage: 'radial-gradient(circle at center, #84fab0 0%, #8fd3f4 100%)' }}
+        >
+          <Text className="text-gray-800 font-semibold text-center">Radial Gradient</Text>
+        </View>
+
+        <View
+          className="p-4 rounded-lg mb-4"
+          style={{
+            experimental_backgroundImage: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%)',
+            backgroundColor: '#3b82f6'
+          }}
+        >
+          <Text className="text-white font-semibold text-center">Overlay Gradient</Text>
+        </View>
+
+        <Text className="text-lg font-semibold text-foreground mb-3 mt-4">
           Theme Colors
         </Text>
 

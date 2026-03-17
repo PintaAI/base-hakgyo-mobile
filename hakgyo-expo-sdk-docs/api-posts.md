@@ -267,6 +267,11 @@ interface Post {
   authorId: string;
   author?: User;
   kelasId?: number;
+  userLiked?: boolean;
+  _count?: {
+    comments: number;
+    likes: number;
+  };
 }
 ```
 
@@ -303,6 +308,24 @@ Represents a comment on a post.
 interface Comment {
   id: number;
   content: string;
+  htmlContent?: string;
+  postId: number;
+  authorId: string;
+  parentId?: number | null;
+  createdAt: string;
+  updatedAt: string;
+  replyCount?: number;
+  likeCount?: number;
+  author?: {
+    id: string;
+    name: string;
+    image?: string;
+  };
+  replies?: Comment[];
+  _count?: {
+    likes: number;
+    replies: number;
+  };
 }
 ```
 

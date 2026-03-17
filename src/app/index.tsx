@@ -4,9 +4,11 @@ import { useAuth } from 'hakgyo-expo-sdk';
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { Background } from '@/components';
+import { useTheme } from '@/hooks/use-theme';
 
 export default function HomeScreen() {
   const { user, session, signOut } = useAuth();
+  const theme = useTheme();
 
   const isAuthenticated = !!user && !!session;
 
@@ -36,7 +38,7 @@ export default function HomeScreen() {
       <Background />
       <View className="flex-1 p-4 justify-center items-center">
         <View className="w-20 h-20 rounded-full bg-primary items-center justify-center mb-4">
-          <FontAwesome name="graduation-cap" size={40} color="#ffffff" />
+          <FontAwesome name="graduation-cap" size={40} color={theme.primaryForeground} />
         </View>
         <Text className="text-3xl font-bold text-foreground">
           Welcome!
@@ -54,7 +56,7 @@ export default function HomeScreen() {
               onPress={handleSignOut}
               className="mt-6 py-3 px-6 rounded-lg bg-secondary active:opacity-80 flex-row items-center gap-2"
             >
-              <FontAwesome name="sign-out" size={16} color="#ffffff" />
+              <FontAwesome name="sign-out" size={16} color={theme.secondaryForeground} />
               <Text className="text-center text-secondary-foreground font-medium">
                 Sign Out
               </Text>
@@ -70,7 +72,7 @@ export default function HomeScreen() {
               onPress={handleSignIn}
               className="mt-6 py-3 px-6 w-full rounded-lg bg-primary active:opacity-80 flex-row items-center justify-center gap-2"
             >
-              <FontAwesome name="sign-in" size={16} color="#ffffff" />
+              <FontAwesome name="sign-in" size={16} color={theme.primaryForeground} />
               <Text className="text-center text-primary-foreground font-medium">
                 Sign In
               </Text>
@@ -80,19 +82,19 @@ export default function HomeScreen() {
 
         <Pressable
           onPress={handleGoToMenu}
-          className="mt-4 py-3 px-6 w-full bg-accent-foreground rounded-lg border border-accent active:opacity-80 flex-row items-center justify-center gap-2"
+          className="mt-4 py-3 px-6 bg-accent-foreground rounded-lg border border-border active:opacity-80 flex-row items-center justify-center gap-2"
         >
-          <FontAwesome name="bars" size={16} color="#4b5563" />
+          <FontAwesome name="bars" size={16} color={theme.accent} />
           <Text className="text-center text-accent font-medium">
             Go to Menu
           </Text>
         </Pressable>
         <Pressable
           onPress={handleViewColors}
-          className="mt-4 py-3 px-6 w-full rounded-lg border bg-accent-foreground border-primary active:opacity-80 flex-row items-center justify-center gap-2"
+          className="mt-4 py-3 px-6 rounded-lg border bg-primary border-border active:opacity-80 flex-row items-center justify-center gap-2"
         >
-          <FontAwesome name="paint-brush" size={16} color="#374151" />
-          <Text className="text-center text-primary font-medium">
+          <FontAwesome name="paint-brush" size={16} color={theme.primaryForeground} />
+          <Text className="text-center text-primary-foreground font-medium">
             View Colors
           </Text>
         </Pressable>

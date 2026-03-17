@@ -181,6 +181,7 @@ interface Tryout {
   koleksiSoalId: number;
   isActive: boolean;
   guruId: string;
+  kelasId?: number;
   createdAt: string;
   updatedAt: string;
   // Optional relations
@@ -189,10 +190,17 @@ interface Tryout {
     name: string;
     image?: string;
   };
+  kelas?: {
+    id: number;
+    title: string;
+  };
   koleksiSoal?: {
     id: number;
     nama: string;
-    soals: any[];
+    soals?: any[];
+  };
+  _count?: {
+    participants: number;
   };
 }
 ```

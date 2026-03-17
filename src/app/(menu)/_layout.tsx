@@ -11,7 +11,7 @@ export default function MenuLayout() {
   return (
     <Tabs
         screenOptions={{
-          headerShown: true,
+          headerShown: false,
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: colors.mutedForeground,
         }}
@@ -19,11 +19,10 @@ export default function MenuLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Menu',
+          title: 'Home',
           tabBarIcon: ({ color }) => (
             <FontAwesome name="home" size={20} color={color} />
           ),
-          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -33,7 +32,15 @@ export default function MenuLayout() {
           tabBarIcon: ({ color }) => (
             <FontAwesome name="book" size={20} color={color} />
           ),
-          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="soal"
+        options={{
+          title: 'Soal',
+          tabBarIcon: ({ color }) => (
+            <FontAwesome name="question-circle" size={20} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -43,7 +50,6 @@ export default function MenuLayout() {
           tabBarIcon: ({ color }) => (
             <EvilIcons name="user" size={24} color={color} />
           ),
-          headerShown: false,
         }}
       />
     </Tabs>
