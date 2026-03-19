@@ -9,7 +9,7 @@ export default function MenuScreen() {
       <Background />
       <MenuHeader title="Home" subtitle="Welcome back!" />
         <ScrollView
-          className="flex-1 pt-5"
+          className="flex-1 px-2 pt-5"
           contentInsetAdjustmentBehavior="automatic"
           contentContainerStyle={{ gap: 5 }}
         >

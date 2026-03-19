@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import React from 'react';
 
-export default function soalLayout() {
+export default function TryoutLayout() {
   return (
     <Stack
       screenOptions={{
@@ -12,20 +12,14 @@ export default function soalLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: 'Question Banks',
+          title: 'Tryouts',
           headerShown: false,
         }}
       />
       <Stack.Screen
-        name="[practiceId]"
+        name="[tryoutId]"
         options={{
-          title: 'Practice',
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="tryout"
-        options={{
+          title: 'Tryout Details',
           headerShown: false,
           presentation: 'modal',
         }}

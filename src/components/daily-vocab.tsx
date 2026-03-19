@@ -85,7 +85,7 @@ export function DailyVocab({ take = 5 }: DailyVocabProps) {
   }
 
   return (
-    <View className=" rounded-lg p-4">
+    <View className=" rounded-lg">
       {vocabulary.map((item) => (
         <Pressable
           key={item.id}

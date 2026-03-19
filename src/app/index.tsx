@@ -1,10 +1,10 @@
+import { Background } from '@/components';
+import { useTheme } from '@/hooks/use-theme';
 import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
 import { router } from 'expo-router';
 import { useAuth } from 'hakgyo-expo-sdk';
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { Background } from '@/components';
-import { useTheme } from '@/hooks/use-theme';
 
 export default function HomeScreen() {
   const { user, session, signOut } = useAuth();
@@ -70,7 +70,7 @@ export default function HomeScreen() {
 
             <Pressable
               onPress={handleSignIn}
-              className="mt-6 py-3 px-6 w-full rounded-lg bg-primary active:opacity-80 flex-row items-center justify-center gap-2"
+              className="mt-6 py-3 px-6  rounded-lg bg-primary active:opacity-80 flex-row items-center justify-center gap-2"
             >
               <FontAwesome name="sign-in" size={16} color={theme.primaryForeground} />
               <Text className="text-center text-primary-foreground font-medium">

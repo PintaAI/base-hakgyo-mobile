@@ -7,9 +7,8 @@ import { AuthCard } from '@/components/auth-card';
 
 export default function AuthScreen() {
   const { user, session } = useAuth();
-
   const isAuthenticated = !!user && !!session;
-
+  
   useEffect(() => {
     // Redirect if already authenticated
     if (isAuthenticated) {

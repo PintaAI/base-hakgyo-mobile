@@ -43,7 +43,7 @@ export default function VocabScreen() {
       <Background />
       <MenuHeader title="Vocabulary" subtitle="Select a vocabulary set to study" />
         <ScrollView
-          className="flex-1 pt-5"
+          className="flex-1 px-2 pt-5"
           contentInsetAdjustmentBehavior="automatic"
           contentContainerStyle={{ gap: 5 }}
         >

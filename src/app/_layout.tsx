@@ -1,3 +1,4 @@
+import { BASE_URL } from '@/lib/config';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
@@ -5,7 +6,6 @@ import { AuthProvider, initSDK } from 'hakgyo-expo-sdk';
 import React from 'react';
 import { Platform, useColorScheme } from 'react-native';
 import "../global.css";
-import { BASE_URL } from '@/lib/config';
 
 // Initialize SDK
 initSDK({
