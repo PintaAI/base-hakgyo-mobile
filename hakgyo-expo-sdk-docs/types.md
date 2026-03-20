@@ -1172,7 +1172,7 @@ function processGameEvent(result: GamificationResult): void {
   }
   
   if (streakInfo) {
-    console.log(`🔥 ${streakInfo.currentStreak} day streak`);
+    console.log(`🔥 ${streakInfo.currentStreak} Login streak`);
   }
 }
 

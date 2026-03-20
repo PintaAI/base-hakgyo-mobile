@@ -40,7 +40,11 @@ export default function VocabScreen() {
   return (
     <View className="flex-1 ">
       <Background />
-      <MenuHeader title="Vocabulary" subtitle="Select a vocabulary set to study" />
+      <MenuHeader
+        title="Vocabulary"
+        subtitle="kumpulan kosa kata"
+        leftIconName="book.closed"
+      />
         <ScrollView
           className="flex-1 px-2 pt-5"
           contentInsetAdjustmentBehavior="automatic"

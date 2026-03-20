@@ -4,3 +4,4 @@ export { MenuHeader } from './menu-header';
 export { TryoutCard } from './tryout-card';
 export { QuizViewer } from './quiz-viewer';
 export { HtmlRenderer } from './html-renderer';
+export { UserStats } from './user-stats';

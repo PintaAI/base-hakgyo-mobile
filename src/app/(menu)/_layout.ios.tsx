@@ -18,15 +18,15 @@ export default function MenuLayout() {
       <NativeTabs.Trigger name="vocab">
         <NativeTabs.Trigger.Label>Vocabulary</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          sf={{ default: 'book', selected: 'book.fill' }}
+          sf={{ default: 'book.closed', selected: 'book.fill' }}
           md="book"
         />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="soal">
         <NativeTabs.Trigger.Label>Soal</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          sf={{ default: 'questionmark.circle', selected: 'questionmark.circle.fill' }}
-          md="help"
+          sf={{ default: 'doc.text', selected: 'doc.text.fill' }}
+          md="description"
         />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile/index">

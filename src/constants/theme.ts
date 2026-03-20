@@ -33,6 +33,15 @@ export const Colors = {
     // Status colors
     destructive: '#ef4444',
     ring: '#4b5563',
+    success: '#16a34a',
+    successForeground: '#15803d',
+    successMuted: '#dcfce7',
+    error: '#dc2626',
+    errorForeground: '#b91c1c',
+    errorMuted: '#fee2e2',
+    info: '#2563eb',
+    infoForeground: '#1d4ed8',
+    infoMuted: '#dbeafe',
     // Primary colors (neutral)
     primary: '#374151',
     primaryForeground: '#ffffff',
@@ -49,7 +58,7 @@ export const Colors = {
     background: '#000000',
     foreground: '#fafafa',
     // Card colors
-    card: '#0a0a0a',
+    card: '#141414',
     cardForeground: '#fafafa',
     // Background variants
     backgroundElement: '#212225',
@@ -68,6 +77,15 @@ export const Colors = {
     // Status colors
     destructive: '#ef4444',
     ring: '#9ca3af',
+    success: '#4ade80',
+    successForeground: '#86efac',
+    successMuted: '#14532d',
+    error: '#f87171',
+    errorForeground: '#fca5a5',
+    errorMuted: '#450a0a',
+    info: '#60a5fa',
+    infoForeground: '#93c5fd',
+    infoMuted: '#1e3a5f',
     // Primary colors (neutral)
     primary: '#d1d5db',
     primaryForeground: '#000000',

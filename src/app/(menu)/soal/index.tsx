@@ -1,10 +1,10 @@
 import { Background, MenuHeader } from '@/components';
 import { KoleksiSoalCard } from '@/components/koleksi-soal-card';
 import { router } from 'expo-router';
+import 'expo-symbols';
 import { KoleksiSoal, soalApi, useAuth } from 'hakgyo-expo-sdk';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
-import 'expo-symbols';
 
 export default function soalScreen() {
   const { user } = useAuth();
@@ -46,6 +46,7 @@ export default function soalScreen() {
       <MenuHeader
         title="Bank Soal"
         subtitle="Seluruh koleksi soal yang tersedia untuk latihan"
+        leftIconName="doc.text"
         rightIconName="timer"
         onRightIconPress={() => router.push('/(menu)/soal/tryout' as never)}
       />

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Image, Pressable, Text, View, type ImageStyle, type TextStyle } from 'react-native';
-import { Play, Pause, RotateCcw } from 'lucide-react-native';
+import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
 
 // TODO: Install expo-audio and create a new dev build
 // npx expo install expo-audio
@@ -138,9 +138,9 @@ function AudioPlayer({ src, filename, duration }: { src: string; filename?: stri
         className="rounded-full w-10 h-10 items-center justify-center bg-primary shrink-0"
       >
         {isPlaying ? (
-          <Pause size={18} color="#fff" />
+          <FontAwesome name="pause" size={18} color="#fff" />
         ) : (
-          <Play size={18} color="#fff" />
+          <FontAwesome name="play" size={18} color="#fff" />
         )}
       </Pressable>
       <Text className="text-xs text-muted-foreground flex-1">
@@ -150,7 +150,7 @@ function AudioPlayer({ src, filename, duration }: { src: string; filename?: stri
         onPress={replay}
         className="rounded-full w-9 h-9 items-center justify-center shrink-0"
       >
-        <RotateCcw size={14} color="#000" />
+        <FontAwesome name="rotate-left" size={14} color="#000" />
       </Pressable>
       {filename && (
         <Text className="text-xs text-muted-foreground" numberOfLines={1}>

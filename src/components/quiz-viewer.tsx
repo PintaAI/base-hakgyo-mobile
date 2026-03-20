@@ -1,20 +1,49 @@
-import { Opsi, Soal } from 'hakgyo-expo-sdk';
-import React, { useRef, useState } from 'react';
-import { FlatList, Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
+import { Opsi, Soal, TryoutResult, TryoutAnswer } from 'hakgyo-expo-sdk';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { HtmlRenderer } from './html-renderer';
+
+export interface SubmitAnswer {
+  soalId: number;
+  opsiId: number;
+}
+
+export interface InitialResultData {
+  result: TryoutResult;
+  answers?: TryoutAnswer[];
+}
 
 interface QuizViewerProps {
   questions: Soal[];
+  mode?: 'practice' | 'tryout';
+  onSubmit?: (answers: SubmitAnswer[]) => Promise<TryoutResult | null>;
+  passingScore?: number;
+  initialResult?: InitialResultData | null;
 }
 
 type UserAnswers = Record<number, number | null>;
 
-export function QuizViewer({ questions }: QuizViewerProps) {
+export function QuizViewer({ questions, mode = 'practice', onSubmit, passingScore, initialResult }: QuizViewerProps) {
   const { width: windowWidth } = useWindowDimensions();
   const [listWidth, setListWidth] = useState(windowWidth);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<UserAnswers>({});
-  const [showResults, setShowResults] = useState(false);
+  const [userAnswers, setUserAnswers] = useState<UserAnswers>(() => {
+    // Initialize userAnswers from initialResult if available
+    if (initialResult?.answers) {
+      const answers: UserAnswers = {};
+      initialResult.answers.forEach((answer) => {
+        if (answer.opsiId) {
+          answers[answer.soalId] = answer.opsiId;
+        }
+      });
+      return answers;
+    }
+    return {};
+  });
+  const [showResults, setShowResults] = useState(!!initialResult);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [tryoutResult, setTryoutResult] = useState<TryoutResult | null>(initialResult?.result || null);
+  const [showReview, setShowReview] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
   const handleSelectAnswer = (opsiId: number, questionId: number) => {
@@ -41,18 +70,47 @@ export function QuizViewer({ questions }: QuizViewerProps) {
     }
   };
 
-  const handleFinish = () => {
-    setShowResults(true);
+  const handleFinish = async () => {
+    if (mode === 'tryout' && onSubmit) {
+      // In tryout mode, submit answers to API
+      setIsSubmitting(true);
+      try {
+        const answers: SubmitAnswer[] = questions
+          .filter((q) => userAnswers[q.id] !== null && userAnswers[q.id] !== undefined)
+          .map((q) => ({
+            soalId: q.id,
+            opsiId: userAnswers[q.id] as number,
+          }));
+        
+        const result = await onSubmit(answers);
+        if (result) {
+          setTryoutResult(result);
+        }
+        setShowResults(true);
+      } catch (error: any) {
+        Alert.alert(
+          'Submission Failed',
+          error?.message || 'Failed to submit tryout. Please try again.',
+          [{ text: 'OK' }]
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      // In practice mode, show results directly
+      setShowResults(true);
+    }
   };
 
   const handleRestart = () => {
     setUserAnswers({});
     setShowResults(false);
+    setTryoutResult(null);
     setCurrentIndex(0);
     flatListRef.current?.scrollToIndex({ index: 0, animated: false });
   };
 
-  // Calculate score
+  // Calculate score (for practice mode or fallback)
   const calculateScore = () => {
     let correct = 0;
     questions.forEach((q) => {
@@ -65,6 +123,21 @@ export function QuizViewer({ questions }: QuizViewerProps) {
     return correct;
   };
 
+  // Get score from tryout result or calculate locally
+  const getScore = () => {
+    if (mode === 'tryout' && tryoutResult) {
+      return tryoutResult.correctCount;
+    }
+    return calculateScore();
+  };
+
+  const getPercentage = () => {
+    if (mode === 'tryout' && tryoutResult) {
+      return tryoutResult.score;
+    }
+    return Math.round((getScore() / questions.length) * 100);
+  };
+
   if (questions.length === 0) {
     return (
       <View className="flex-1 items-center justify-center p-6">
@@ -75,21 +148,61 @@ export function QuizViewer({ questions }: QuizViewerProps) {
 
   // Results screen
   if (showResults) {
-    const score = calculateScore();
-    const percentage = Math.round((score / questions.length) * 100);
+    const score = getScore();
+    const percentage = getPercentage();
+    const passed = mode === 'tryout' && tryoutResult?.passed !== undefined
+      ? tryoutResult.passed
+      : (passingScore !== undefined ? percentage >= passingScore : undefined);
 
     return (
-      <ScrollView className="flex-1 pt-3" contentContainerStyle={{ paddingBottom: 24 }}>
+      <ScrollView className="flex-1 pt-3 p-2" contentContainerStyle={{ paddingBottom: 32 }}>
         {/* Score Summary */}
         <View className="bg-card p-6 rounded-lg border border-border items-center">
-          <Text className="text-4xl font-bold text-primary mb-2">{percentage}%</Text>
-          <Text className="text-lg text-foreground">
-            {score} out of {questions.length} correct
+          <Text className="text-5xl font-bold text-primary mb-1">{percentage}%</Text>
+          <Text className="text-base text-muted-foreground">
+            {score} of {questions.length} correct
           </Text>
+          {mode === 'tryout' && tryoutResult?.timeTakenSeconds !== undefined && (
+            <Text className="text-sm text-muted-foreground mt-1">
+              {Math.floor(tryoutResult.timeTakenSeconds / 60)}m {tryoutResult.timeTakenSeconds % 60}s
+            </Text>
+          )}
+          {passed !== undefined && (
+            <View
+              className={`mt-4 px-5 py-2 rounded-full ${
+                passed ? 'bg-success-muted' : 'bg-error-muted'
+              }`}
+            >
+              <Text className={`text-sm font-semibold ${passed ? 'text-success-foreground' : 'text-error-foreground'}`}>
+                {passed ? 'PASSED' : 'FAILED'}
+              </Text>
+            </View>
+          )}
         </View>
 
-        {/* Question Review */}
-        {questions.map((question, qIndex) => {
+        {/* Action Buttons */}
+        <View className="mt-4 gap-3">
+          <Pressable
+            className="p-4 bg-card rounded-lg border border-border items-center flex-row justify-center gap-2"
+            onPress={() => setShowReview(!showReview)}
+          >
+            <Text className="text-primary font-medium">
+              {showReview ? 'Hide Review' : 'Review Answers'}
+            </Text>
+          </Pressable>
+
+          {mode === 'practice' && (
+            <Pressable
+              className="p-4 bg-primary rounded-lg items-center"
+              onPress={handleRestart}
+            >
+              <Text className="text-primary-foreground font-semibold">Try Again</Text>
+            </Pressable>
+          )}
+        </View>
+
+        {/* Question Review - only shown when showReview is true */}
+        {showReview && questions.map((question, qIndex) => {
           const selectedOpsiId = userAnswers[question.id];
           const correctOpsi = question.opsis?.find((o) => o.isCorrect);
           const isCorrect = selectedOpsiId === correctOpsi?.id;
@@ -102,10 +215,10 @@ export function QuizViewer({ questions }: QuizViewerProps) {
                 </Text>
                 <View
                   className={`px-2 py-0.5 rounded ${
-                    isCorrect ? 'bg-green-500/20' : 'bg-red-500/20'
+                    isCorrect ? 'bg-success-muted' : 'bg-error-muted'
                   }`}
                 >
-                  <Text className={`text-xs ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+                  <Text className={`text-xs ${isCorrect ? 'text-success-foreground' : 'text-error-foreground'}`}>
                     {isCorrect ? 'Correct' : 'Incorrect'}
                   </Text>
                 </View>
@@ -122,18 +235,18 @@ export function QuizViewer({ questions }: QuizViewerProps) {
                     key={opsi.id}
                     className={`p-3 rounded-lg mb-2 border ${
                       isCorrectOpsi
-                        ? 'bg-green-500/20 border-green-500'
+                        ? 'bg-success-muted border-success'
                         : isSelected
-                        ? 'bg-red-500/20 border-red-500'
+                        ? 'bg-error-muted border-error'
                         : 'bg-muted border-border'
                     }`}
                   >
                     <View
                       className={
                         isCorrectOpsi
-                          ? 'text-green-700'
+                          ? 'text-success-foreground'
                           : isSelected
-                          ? 'text-red-700'
+                          ? 'text-error-foreground'
                           : 'text-foreground'
                       }
                     >
@@ -144,24 +257,16 @@ export function QuizViewer({ questions }: QuizViewerProps) {
               })}
 
               {question.explanation && (
-                <View className="mt-3 p-3 bg-blue-500/10 rounded-lg">
-                  <Text className="text-sm font-semibold text-blue-700 mb-1">
+                <View className="mt-3 p-3 bg-info-muted rounded-lg">
+                  <Text className="text-sm font-semibold text-info-foreground mb-1">
                     Explanation:
                   </Text>
-                  <Text className="text-sm text-blue-800">{question.explanation}</Text>
+                  <Text className="text-sm text-info-foreground">{question.explanation}</Text>
                 </View>
               )}
             </View>
           );
         })}
-
-        {/* Restart Button */}
-        <Pressable
-          className="mt-6 p-4 bg-primary rounded-lg items-center"
-          onPress={handleRestart}
-        >
-          <Text className="text-primary-foreground font-semibold">Try Again</Text>
-        </Pressable>
       </ScrollView>
     );
   }
@@ -260,12 +365,19 @@ export function QuizViewer({ questions }: QuizViewerProps) {
 
                 {currentIndex === questions.length - 1 ? (
                   <Pressable
-                    className="flex-1 p-4 bg-primary rounded-lg"
+                    className={`flex-1 p-4 bg-primary rounded-lg flex-row items-center justify-center ${
+                      isSubmitting ? 'opacity-70' : ''
+                    }`}
                     onPress={handleFinish}
+                    disabled={isSubmitting}
                   >
-                    <Text className="text-center text-primary-foreground font-semibold">
-                      Finish
-                    </Text>
+                    {isSubmitting ? (
+                      <ActivityIndicator size="small" className="text-primary-foreground" />
+                    ) : (
+                      <Text className="text-center text-primary-foreground font-semibold">
+                        {mode === 'tryout' ? 'Submit' : 'Finish'}
+                      </Text>
+                    )}
                   </Pressable>
                 ) : (
                   <Pressable

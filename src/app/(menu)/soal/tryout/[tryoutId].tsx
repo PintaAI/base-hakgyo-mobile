@@ -1,14 +1,18 @@
+import { MenuHeader } from '@/components/menu-header';
+import { QuizViewer, SubmitAnswer, InitialResultData } from '@/components/quiz-viewer';
 import { useLocalSearchParams } from 'expo-router';
-import { Tryout, tryoutApi } from 'hakgyo-expo-sdk';
+import { Soal, Tryout, tryoutApi, TryoutResult, TryoutParticipant,} from 'hakgyo-expo-sdk';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
-
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 export default function TryoutDetailScreen() {
   const { tryoutId } = useLocalSearchParams<{ tryoutId: string }>();
   const id = Number(tryoutId);
   const [tryout, setTryout] = useState<Tryout | null>(null);
+  const [questions, setQuestions] = useState<Soal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [existingResult, setExistingResult] = useState<InitialResultData | null>(null);
+  const [checkingResult, setCheckingResult] = useState(true);
 
   useEffect(() => {
     if (id) {
@@ -20,21 +24,81 @@ export default function TryoutDetailScreen() {
     try {
       setLoading(true);
       setError(null);
+      setCheckingResult(true);
 
       // Fetch the tryout details
       const response = await tryoutApi.get(id);
       setTryout(response.data || null);
+
+      // Extract questions from the tryout's koleksiSoal
+      const soals = response.data?.koleksiSoal?.soals || [];
+      setQuestions(soals);
+
+      // Check for existing result
+      try {
+        const resultResponse = await tryoutApi.getResults(id);
+        console.log('getResults response:', resultResponse);
+        
+        // Handle different response types
+        if (resultResponse.data) {
+          if (!Array.isArray(resultResponse.data)) {
+            // Single TryoutResult (student view)
+            console.log('User already has a result for this tryout:', resultResponse.data);
+            setExistingResult({ result: resultResponse.data });
+          } else if (Array.isArray(resultResponse.data) && resultResponse.data.length > 0) {
+            // Array of TryoutParticipant - get the latest one for the current user
+            const participant = resultResponse.data[0] as TryoutParticipant;
+            
+            if (participant && participant.status === 'SUBMITTED') {
+              setExistingResult({
+                result: {
+                  id: participant.id,
+                  score: participant.score,
+                  correctCount: Math.round((participant.score / 100) * soals.length),
+                  totalCount: soals.length,
+                  timeTakenSeconds: participant.timeTakenSeconds,
+                  passed: tryout?.passingScore ? participant.score >= tryout.passingScore : undefined,
+                },
+                answers: participant.answers,
+              });
+            } else {
+              console.log('User has no result for this tryout - participant not submitted');
+            }
+          } else {
+            console.log('User has no result for this tryout - empty array');
+          }
+        } else {
+          console.log('User has no result for this tryout - no data');
+        }
+      } catch (resultErr) {
+        console.log('User has no result for this tryout - error:', resultErr);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load tryout');
-      console.error('Error fetching tryout:', err);
     } finally {
       setLoading(false);
+      setCheckingResult(false);
+    }
+  };
+
+  const handleSubmit = async (answers: SubmitAnswer[]): Promise<TryoutResult | null> => {
+    try {
+      const result = await tryoutApi.submit(id, answers);
+      
+      // Update existing result after successful submission
+      if (result.data) {
+        setExistingResult({ result: result.data });
+      }
+      
+      return result.data || null;
+    } catch (err) {
+      throw err;
     }
   };
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center">
+      <View className="flex-1 bg-card items-center justify-center">
         <ActivityIndicator size="large" className="text-primary" />
         <Text className="mt-2 text-muted-foreground">Loading tryout...</Text>
       </View>
@@ -55,31 +119,49 @@ export default function TryoutDetailScreen() {
     );
   }
 
+  // Truncate description to single line
+  const truncateText = (text: string, maxLength: number = 50) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength).trim() + '...';
+  };
+
+  // Build subtitle with duration and question count
+  const getSubtitle = () => {
+    const parts = [];
+    if (tryout.duration) {
+      parts.push(`${tryout.duration} mins`);
+    }
+    parts.push(`${questions.length} questions`);
+    return parts.join(' | ');
+  };
+
   return (
     <View className="flex-1">
       {/* Header */}
-      <View className="p-6 pb-4" collapsable={false}>
-        <Text className="text-foreground text-2xl font-bold">{tryout.nama}</Text>
-        {tryout.description && (
-          <Text className="mt-1 text-muted-foreground">{tryout.description}</Text>
-        )}
-        <Text className="text-sm text-primary mt-2">
-          Duration: {tryout.duration} mins | Passing Score: {tryout.passingScore}
-        </Text>
-      </View>
+      <MenuHeader
+        title={tryout.nama}
+        subtitle={tryout.description ? truncateText(tryout.description) : getSubtitle()}
+        insetEnabled={false}
+        centerAlign={true}
+      />
 
-      {/* Raw JSON Data */}
-      <ScrollView
-        className="flex-1 px-4 border-t border-border"
-        contentContainerStyle={{ paddingBottom: 24 }}
-      >
-        <View className="bg-card p-4 rounded-lg border border-border mt-4">
-          <Text className="text-sm font-semibold text-foreground mb-2">Raw JSON Data:</Text>
-          <Text className="text-xs text-muted-foreground font-mono">
-            {JSON.stringify(tryout, null, 2)}
-          </Text>
-        </View>
-      </ScrollView>
+      {/* Quiz Viewer */}
+      <View className="flex-1 bg-card/10 p-0 border-border overflow-visible">
+        {checkingResult ? (
+          <View className="flex-1 items-center justify-center">
+            <ActivityIndicator size="large" className="text-primary" />
+            <Text className="mt-2 text-muted-foreground">Checking for existing result...</Text>
+          </View>
+        ) : (
+          <QuizViewer
+            questions={questions}
+            mode="tryout"
+            onSubmit={handleSubmit}
+            passingScore={tryout.passingScore}
+            initialResult={existingResult}
+          />
+        )}
+      </View>
     </View>
   );
 }

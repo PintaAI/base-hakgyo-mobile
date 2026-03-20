@@ -21,6 +21,17 @@
   --color-destructive: #ef4444;
   --color-ring: #4b5563;
 
+  /* Status colors - subtle tones */
+  --color-success: #16a34a;
+  --color-success-foreground: #15803d;
+  --color-success-muted: #dcfce7;
+  --color-error: #dc2626;
+  --color-error-foreground: #b91c1c;
+  --color-error-muted: #fee2e2;
+  --color-info: #2563eb;
+  --color-info-foreground: #1d4ed8;
+  --color-info-muted: #dbeafe;
+
   /* Primary, Secondary, Accent colors */
   --color-primary: #374151;
   --color-primary-foreground: #ffffff;
@@ -45,7 +56,7 @@
     --color-background: #000000;
     --color-foreground: #fafafa;
     /* Card colors */
-    --color-card: #0a0a0a;
+    --color-card: #141414;
     --color-card-foreground: #fafafa;
     --color-border: #1a1a1a;
     --color-border-focus: #9ca3af;
@@ -55,6 +66,17 @@
     --color-muted-foreground: #737373;
     --color-destructive: #ef4444;
     --color-ring: #9ca3af;
+
+    /* Status colors for dark mode - subtle tones */
+    --color-success: #4ade80;
+    --color-success-foreground: #86efac;
+    --color-success-muted: #14532d;
+    --color-error: #f87171;
+    --color-error-foreground: #fca5a5;
+    --color-error-muted: #450a0a;
+    --color-info: #60a5fa;
+    --color-info-foreground: #93c5fd;
+    --color-info-muted: #1e3a5f;
 
     /* Primary, Secondary, Accent colors for dark mode */
     --color-primary: #d1d5db;

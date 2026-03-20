@@ -26,8 +26,6 @@ export default function PracticeDetailScreen() {
 
       // Fetch the collection details
       const collectionResponse = await soalApi.getCollection(collectionId);
-      console.log('=== Collection API Response ===');
-      console.log(JSON.stringify(collectionResponse, null, 2));
       setCollection(collectionResponse.data || null);
 
       // Fetch questions in the collection
@@ -35,12 +33,9 @@ export default function PracticeDetailScreen() {
         koleksiSoalId: String(collectionId),
         limit: 100,
       });
-      console.log('=== Questions API Response ===');
-      console.log(JSON.stringify(questionsResponse, null, 2));
       setQuestions(questionsResponse.data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load question collection');
-      console.error('Error fetching soal:', err);
     } finally {
       setLoading(false);
     }
@@ -82,10 +77,11 @@ export default function PracticeDetailScreen() {
         title={collection.nama}
         subtitle={collection.deskripsi ? truncateText(collection.deskripsi) : `${questions.length} questions`}
         insetEnabled={false}
+        centerAlign={true}
       />
 
       {/* Quiz Viewer */}
-      <View className="flex-1 bg-card/70 p-0 border-t border-border overflow-visible">
+      <View className="flex-1 bg-background p-0  border-border overflow-visible">
         <QuizViewer questions={questions} />
       </View>
     </View>
