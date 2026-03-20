@@ -92,7 +92,7 @@ export default function VocabDetailScreen() {
 
       {/* Vocabulary Items */}
       <ScrollView
-        className="flex-1 px-4 border-t border-border pt-2"
+        className="flex-1 px-4 border-border pt-2"
         contentContainerStyle={{ paddingBottom: 24, gap: 12 }}
       >
         {vocabItems.length === 0 ? (
@@ -107,7 +107,7 @@ export default function VocabDetailScreen() {
               <Pressable
                 key={item.id}
                 onPress={() => toggleExpand(item.id)}
-                className="p-4 bg-accent-foreground/50 rounded-lg border border-border"
+                className="p-4 bg-card rounded-lg border border-border"
               >
                 <View className="flex-row justify-between items-start">
                   <View className="flex-1">

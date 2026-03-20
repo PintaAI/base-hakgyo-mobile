@@ -21,13 +21,14 @@ export default function soalLayout() {
         options={{
           title: 'Practice',
           headerShown: false,
+          presentation: 'formSheet',
         }}
       />
       <Stack.Screen
         name="tryout"
         options={{
           headerShown: false,
-          presentation: 'modal',
+          
         }}
       />
     </Stack>

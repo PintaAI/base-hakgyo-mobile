@@ -9,6 +9,9 @@
   /* Light mode colors (default) */
   --color-background: #ffffff;
   --color-foreground: #000000;
+  /* Card colors */
+  --color-card: #ffffff;
+  --color-card-foreground: #000000;
   --color-border: #e5e7eb;
   --color-border-focus: #4b5563;
   --color-input: #f9fafb;
@@ -41,6 +44,9 @@
   :root {
     --color-background: #000000;
     --color-foreground: #fafafa;
+    /* Card colors */
+    --color-card: #0a0a0a;
+    --color-card-foreground: #fafafa;
     --color-border: #1a1a1a;
     --color-border-focus: #9ca3af;
     --color-input: #0d0d0d;

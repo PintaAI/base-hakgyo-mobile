@@ -5,6 +5,7 @@ import { Stack } from 'expo-router';
 import { AuthProvider, initSDK } from 'hakgyo-expo-sdk';
 import React from 'react';
 import { Platform, useColorScheme } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import "../global.css";
 
 // Initialize SDK
@@ -42,30 +43,32 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
    
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AuthProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen
-            name="auth"
-            options={{
-              headerShown: false,
-              title: 'Sign In',
-              presentation: 'formSheet',
-              sheetGrabberVisible: true,
-              sheetAllowedDetents: [0.5, 1.0],
-            }}
-          />
-          <Stack.Screen
-            name="color"
-            options={{
-              headerShown: false,
-              title: 'Colors',
-              presentation: 'card',
-              animation: 'ios_from_right',
-            }}
-          />
-        </Stack>
-      </AuthProvider>
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <AuthProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen
+              name="auth"
+              options={{
+                headerShown: false,
+                title: 'Sign In',
+                presentation: 'formSheet',
+                sheetGrabberVisible: true,
+                sheetAllowedDetents: [0.5, 1.0],
+              }}
+            />
+            <Stack.Screen
+              name="color"
+              options={{
+                headerShown: false,
+                title: 'Colors',
+                presentation: 'card',
+                animation: 'ios_from_right',
+              }}
+            />
+          </Stack>
+        </AuthProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }

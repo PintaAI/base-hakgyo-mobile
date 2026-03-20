@@ -90,7 +90,7 @@ export function DailyVocab({ take = 5 }: DailyVocabProps) {
         <Pressable
           key={item.id}
           onPress={() => toggleExpand(item.id)}
-          className="p-3 mb-2 bg-muted/50 border border-border shadow-sm rounded-lg"
+          className="p-3 mb-2 bg-card border border-border shadow-sm rounded-lg"
         >
           <View className="flex-row justify-between items-center">
             <View className="flex-1">

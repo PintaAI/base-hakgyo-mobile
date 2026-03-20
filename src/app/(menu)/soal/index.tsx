@@ -41,11 +41,11 @@ export default function soalScreen() {
   };
 
   return (
-    <View className="flex-1 ">
+    <View className="flex-1">
       <Background />
       <MenuHeader
-        title="Question Banks"
-        subtitle="Select a question bank to practice"
+        title="Bank Soal"
+        subtitle="Seluruh koleksi soal yang tersedia untuk latihan"
         rightIconName="timer"
         onRightIconPress={() => router.push('/(menu)/soal/tryout' as never)}
       />

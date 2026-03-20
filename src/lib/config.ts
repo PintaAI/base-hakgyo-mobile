@@ -6,7 +6,6 @@
  * - Production: https://hakgyo.vercel.app
  */
 
-import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 // Detect if we're in development mode
@@ -57,12 +56,6 @@ const getBaseUrl = (): string => {
 };
 
 export const BASE_URL = getBaseUrl();
-
-// Log the base URL being used (helpful for debugging on real devices)
-const devServerIp = getDevServerIp();
-console.log(`[Config] BASE_URL: ${BASE_URL}`);
-console.log(`[Config] Platform: ${Platform.OS}, isDev: ${isDevelopment}`);
-console.log(`[Config] DevServer IP: ${devServerIp || 'not detected'}, Env IP: ${LOCAL_HOST_IP || 'not set'}`);
 
 // API version (can be extended for versioning)
 export const API_VERSION = 'v1';

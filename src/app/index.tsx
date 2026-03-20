@@ -17,7 +17,7 @@ export default function HomeScreen() {
       await signOut();
       router.push('/auth');
     } catch (error) {
-      console.error('Sign out error:', error);
+      // Handle sign out error silently
     }
   };
 

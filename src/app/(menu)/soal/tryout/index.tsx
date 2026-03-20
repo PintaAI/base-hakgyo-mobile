@@ -1,4 +1,4 @@
-import { Background, MenuHeader } from '@/components';
+import { TryoutCard } from '@/components';
 import { router } from 'expo-router';
 import { Tryout, tryoutApi, useAuth } from 'hakgyo-expo-sdk';
 import React, { useEffect, useState } from 'react';
@@ -39,10 +39,12 @@ export default function TryoutScreen() {
   };
 
   return (
-    <View className="flex-1 ">
-      <Background />
+    <View className="flex-1">
+      <View className="px-4 pt-4 pb-2 items-center">
+        <Text className="text-2xl font-bold text-foreground">Tryout</Text>
+      </View>
       <ScrollView
-        className="flex-1 pt-5"
+        className="flex-1 p-3"
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{ gap: 5 }}
       >
@@ -72,19 +74,7 @@ export default function TryoutScreen() {
           <Text className="text-muted-foreground">No tryouts available</Text>
         ) : (
           tryouts.map((tryout) => (
-            <Pressable
-              key={tryout.id}
-              className="p-4 bg-card border border-border rounded-lg"
-              onPress={() => handlePress(tryout.id)}
-            >
-              <Text className="text-foreground font-semibold">{tryout.nama}</Text>
-              {tryout.description && (
-                <Text className="text-muted-foreground text-sm mt-1">{tryout.description}</Text>
-              )}
-              <Text className="text-primary text-sm mt-2">
-                Duration: {tryout.duration} mins
-              </Text>
-            </Pressable>
+            <TryoutCard key={tryout.id} tryout={tryout} onPress={handlePress} />
           ))
         )}
       </ScrollView>

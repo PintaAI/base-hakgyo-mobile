@@ -28,7 +28,6 @@ export default function VocabScreen() {
       setVocabSets(response?.data ?? []);
     } catch (err) {
       setError('Failed to load vocabulary sets');
-      console.error('Error fetching vocab sets:', err);
     } finally {
       setLoading(false);
     }

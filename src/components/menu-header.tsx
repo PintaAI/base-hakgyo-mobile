@@ -1,25 +1,29 @@
-import { Colors } from '@/constants/theme';
 import { SymbolView, type SFSymbol } from 'expo-symbols';
 import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '@/hooks/use-theme';
 
 interface MenuHeaderProps {
   title: string;
   subtitle?: string;
   rightIconName?: SFSymbol;
   onRightIconPress?: () => void;
+  /** Whether to apply safe area inset padding. Defaults to true. */
+  insetEnabled?: boolean;
 }
 
 export function MenuHeader({
   title,
   subtitle,
   rightIconName,
-  onRightIconPress
+  onRightIconPress,
+  insetEnabled = true
 }: MenuHeaderProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
 
   return (
-    <View className="px-4 bg-background/60 pb-3 flex-row items-start justify-between" style={{ paddingTop: insets.top  }}>
+    <View className="px-5 bg-background/60 pb-3 flex-row items-start justify-between" style={{ paddingTop: insetEnabled ? insets.top : 15  }}>
       <View className="flex-1">
         <Text className="text-2xl font-bold text-foreground">{title}</Text>
         {subtitle && (
@@ -35,7 +39,7 @@ export function MenuHeader({
           <SymbolView
             name={rightIconName}
             size={24}
-            tintColor={Colors.light.foreground}
+            tintColor={theme.foreground}
           />
         </Pressable>
       )}

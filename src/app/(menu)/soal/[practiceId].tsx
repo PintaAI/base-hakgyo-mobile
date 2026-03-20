@@ -1,7 +1,9 @@
 import { useLocalSearchParams } from 'expo-router';
 import { KoleksiSoal, Soal, soalApi } from 'hakgyo-expo-sdk';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { MenuHeader } from '@/components/menu-header';
+import { QuizViewer } from '@/components/quiz-viewer';
 
 export default function PracticeDetailScreen() {
   const { practiceId } = useLocalSearchParams<{ practiceId: string }>();
@@ -24,6 +26,8 @@ export default function PracticeDetailScreen() {
 
       // Fetch the collection details
       const collectionResponse = await soalApi.getCollection(collectionId);
+      console.log('=== Collection API Response ===');
+      console.log(JSON.stringify(collectionResponse, null, 2));
       setCollection(collectionResponse.data || null);
 
       // Fetch questions in the collection
@@ -31,6 +35,8 @@ export default function PracticeDetailScreen() {
         koleksiSoalId: String(collectionId),
         limit: 100,
       });
+      console.log('=== Questions API Response ===');
+      console.log(JSON.stringify(questionsResponse, null, 2));
       setQuestions(questionsResponse.data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load question collection');
@@ -63,36 +69,25 @@ export default function PracticeDetailScreen() {
     );
   }
 
-  const rawData = {
-    collection,
-    questions,
+  // Truncate description to single line
+  const truncateText = (text: string, maxLength: number = 50) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength).trim() + '...';
   };
 
   return (
     <View className="flex-1">
       {/* Header */}
-      <View className="p-6 pb-4" collapsable={false}>
-        <Text className="text-foreground text-2xl font-bold">{collection.nama}</Text>
-        {collection.deskripsi && (
-          <Text className="mt-1 text-muted-foreground">{collection.deskripsi}</Text>
-        )}
-        <Text className="text-sm text-primary mt-2">
-          {questions.length} questions
-        </Text>
-      </View>
+      <MenuHeader
+        title={collection.nama}
+        subtitle={collection.deskripsi ? truncateText(collection.deskripsi) : `${questions.length} questions`}
+        insetEnabled={false}
+      />
 
-      {/* Raw JSON Data */}
-      <ScrollView
-        className="flex-1 px-4 border-t border-border"
-        contentContainerStyle={{ paddingBottom: 24 }}
-      >
-        <View className="bg-card p-4 rounded-lg border border-border mt-4">
-          <Text className="text-sm font-semibold text-foreground mb-2">Raw JSON Data:</Text>
-          <Text className="text-xs text-muted-foreground font-mono">
-            {JSON.stringify(rawData, null, 2)}
-          </Text>
-        </View>
-      </ScrollView>
+      {/* Quiz Viewer */}
+      <View className="flex-1 bg-card/70 p-0 border-t border-border overflow-visible">
+        <QuizViewer questions={questions} />
+      </View>
     </View>
   );
 }

@@ -54,17 +54,16 @@ export function AuthCard({
       // Handle specific Google Sign-In errors
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         // User cancelled the sign-in - no error needed
-        console.log('Google Sign-In cancelled by user');
+        return;
       } else if (error.code === statusCodes.IN_PROGRESS) {
         // Operation is already in progress - no error needed
-        console.log('Google Sign-In already in progress');
+        return;
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         onError?.(new Error('Google Play Services not available. Please install Google Play Services to continue.'));
       } else {
         // Catch all other errors
         const errorMessage = error?.message || 'An unexpected error occurred during sign-in. Please try again.';
         onError?.(new Error(errorMessage));
-        console.error('Google Sign-In error:', error);
       }
     } finally {
       // Always reset loading state
@@ -92,7 +91,6 @@ export function AuthCard({
     } catch (error: any) {
       const errorMessage = error?.message || 'Invalid email or password. Please try again.';
       onError?.(new Error(errorMessage));
-      console.error('Credential sign-in error:', error);
     } finally {
       setIsLoading(false);
     }
