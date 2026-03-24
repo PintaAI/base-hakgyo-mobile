@@ -16,7 +16,7 @@ export default function MenuLayout() {
         />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="vocab">
-        <NativeTabs.Trigger.Label>Vocabulary</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>Kosa Kata</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           sf={{ default: 'book.closed', selected: 'book.fill' }}
           md="book"

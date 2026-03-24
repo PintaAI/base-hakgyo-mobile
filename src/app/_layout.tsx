@@ -1,4 +1,5 @@
 import { BASE_URL } from '@/lib/config';
+import { KelasProvider } from '@/contexts/kelas-context';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
@@ -40,13 +41,13 @@ GoogleSignin.configure({
 });
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-   
+  const colorScheme = useColorScheme();  
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <AuthProvider>
-          <Stack screenOptions={{ headerShown: false }}>
+          <KelasProvider>
+            <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen
               name="auth"
               options={{
@@ -66,7 +67,25 @@ export default function RootLayout() {
                 animation: 'ios_from_right',
               }}
             />
+            <Stack.Screen
+              name="notification"
+              options={{
+                headerShown: false,
+                title: 'Notifications',
+                presentation: 'card',
+                animation: 'ios_from_right',
+              }}
+            />
+            <Stack.Screen
+              name="game"
+              options={{
+                headerShown: false,
+                title: 'Game',
+              animation: 'default',
+              }}
+            />
           </Stack>
+          </KelasProvider>
         </AuthProvider>
       </ThemeProvider>
     </GestureHandlerRootView>

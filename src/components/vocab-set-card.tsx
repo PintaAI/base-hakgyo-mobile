@@ -1,12 +1,14 @@
-import { Pressable, Text, View } from 'react-native';
 import { VocabularySet } from 'hakgyo-expo-sdk';
+import { Pressable, Text, View } from 'react-native';
 
 interface VocabSetCardProps {
   set: VocabularySet;
   onPress: (id: number) => void;
+  onLongPress?: (id: number) => void;
+  isUserOwned?: boolean;
 }
 
-export function VocabSetCard({ set, onPress }: VocabSetCardProps) {
+export function VocabSetCard({ set, onPress, onLongPress, isUserOwned = false }: VocabSetCardProps) {
   // Map icon names to display (could be expanded with actual icon components)
   const getIconDisplay = (iconName: string | null | undefined): string => {
     const iconMap: Record<string, string> = {
@@ -25,6 +27,7 @@ export function VocabSetCard({ set, onPress }: VocabSetCardProps) {
     <Pressable
       className="p-4 bg-card rounded-lg border shadow border-border active:opacity-70"
       onPress={() => onPress(set.id)}
+      onLongPress={isUserOwned && onLongPress ? () => onLongPress(set.id) : undefined}
     >
       <View className="flex-row items-start gap-3">
         <View className="w-10 h-10 items-center justify-center rounded-lg border border-border bg-background">
@@ -34,7 +37,11 @@ export function VocabSetCard({ set, onPress }: VocabSetCardProps) {
           <Text className="text-lg font-semibold text-foreground" numberOfLines={1}>
             {set.title}
           </Text>
-          {set.user ? (
+          {isUserOwned ? (
+            <View className="self-start px-2 py-0.5 bg-primary/20 rounded mt-1">
+              <Text className="text-xs text-primary font-medium">Koleksi Ku</Text>
+            </View>
+          ) : set.user ? (
             <Text className="text-xs text-muted-foreground">
               by {set.user.name}
             </Text>
@@ -50,9 +57,9 @@ export function VocabSetCard({ set, onPress }: VocabSetCardProps) {
       {/* Progress Bar or Empty State */}
       {itemCount > 0 ? (
         <View className="mt-3">
-          <View className="h-2 bg-secondary rounded-full overflow-hidden">
+          <View className="h-2 bg-muted rounded-full overflow-hidden">
             <View
-              className="h-full bg-primary rounded-full"
+              className="h-full bg-success/50 rounded-full"
               style={{ width: `${progressPercentage}%` }}
             />
           </View>

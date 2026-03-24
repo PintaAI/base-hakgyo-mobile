@@ -1,5 +1,6 @@
 import { Background, MenuHeader } from '@/components';
 import { KoleksiSoalCard } from '@/components/koleksi-soal-card';
+import { useKelas } from '@/contexts/kelas-context';
 import { router } from 'expo-router';
 import 'expo-symbols';
 import { KoleksiSoal, soalApi, useAuth } from 'hakgyo-expo-sdk';
@@ -8,13 +9,14 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-nati
 
 export default function soalScreen() {
   const { user } = useAuth();
+  const { selectedKelas } = useKelas();
   const [collections, setCollections] = useState<KoleksiSoal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCollections();
-  }, [user?.id]);
+  }, [user?.id, selectedKelas?.id]);
 
   const fetchCollections = async () => {
     if (!user?.id) {
@@ -25,7 +27,10 @@ export default function soalScreen() {
     try {
       setLoading(true);
       setError(null);
-      const response = await soalApi.listCollections({ limit: 50 });
+      const response = await soalApi.listCollections({
+        limit: 50,
+        kelasId: selectedKelas?.id ? String(selectedKelas.id) : undefined
+      });
       setCollections(response?.data ?? []);
     } catch (err) {
       setError('Failed to load question collections');
@@ -45,7 +50,7 @@ export default function soalScreen() {
       <Background />
       <MenuHeader
         title="Bank Soal"
-        subtitle="Seluruh koleksi soal yang tersedia untuk latihan"
+        subtitle={selectedKelas ? `Dari kelas ${selectedKelas.title}` : 'Seluruh koleksi soal yang tersedia untuk latihan'}
         leftIconName="doc.text"
         rightIconName="timer"
         onRightIconPress={() => router.push('/(menu)/soal/tryout' as never)}

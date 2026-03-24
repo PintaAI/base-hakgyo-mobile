@@ -22,9 +22,14 @@ export function KoleksiSoalCard({ collection, onPress }: KoleksiSoalCardProps) {
           <FontAwesome name="file" size={20} color={theme.primary} />
         </View>
         <View className="flex-1">
-          <Text className="text-lg font-semibold text-foreground" numberOfLines={1}>
-            {collection.nama}
-          </Text>
+          <View className="flex-row items-center justify-between">
+            <Text className="text-lg font-semibold text-foreground flex-1" numberOfLines={1}>
+              {collection.nama}
+            </Text>
+            <Text className="text-xs text-muted-foreground ml-2">
+              {questionCount} Soal
+            </Text>
+          </View>
           {collection.user ? (
             <Text className="text-xs text-muted-foreground">
               by {collection.user.name}
@@ -37,13 +42,6 @@ export function KoleksiSoalCard({ collection, onPress }: KoleksiSoalCardProps) {
           {collection.deskripsi}
         </Text>
       ) : null}
-
-      {/* Question count */}
-      <View className="mt-3">
-        <Text className="text-xs text-muted-foreground">
-          {questionCount} questions
-        </Text>
-      </View>
     </Pressable>
   );
 }

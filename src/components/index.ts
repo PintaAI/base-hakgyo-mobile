@@ -5,3 +5,5 @@ export { TryoutCard } from './tryout-card';
 export { QuizViewer } from './quiz-viewer';
 export { HtmlRenderer } from './html-renderer';
 export { UserStats } from './user-stats';
+export { JoinedKelasList } from './joined-kelas-list';
+export { DailyVocab } from './daily-vocab';

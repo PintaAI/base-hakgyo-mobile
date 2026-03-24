@@ -53,7 +53,7 @@ export function UserStats({ streak, bestStreak, level, xp }: UserStatsProps) {
   }, [xp, level]);
 
   return (
-    <View style={{ gap: 12 }}>
+    <View style={{ gap: 5 }}>
       {/* Level card with XP progress */}
       <View
         style={{
