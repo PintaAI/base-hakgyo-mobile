@@ -12,7 +12,7 @@ import { useKelas } from '@/contexts/kelas-context';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
-  const { joinedKelas, selectedKelas, isLoading, error, setSelectedKelas } = useKelas();
+  const { joinedKelas, isLoading, error } = useKelas();
 
   const handleSignOut = async () => {
     try {
@@ -226,10 +226,8 @@ export default function ProfileScreen() {
           {/* Joined Kelas List */}
           <JoinedKelasList
             joinedKelas={joinedKelas}
-            selectedKelas={selectedKelas}
             isLoading={isLoading}
             error={error}
-            onSelectKelas={setSelectedKelas}
           />
 
           {/* Logout Button */}

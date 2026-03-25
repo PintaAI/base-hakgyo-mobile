@@ -162,7 +162,7 @@ export default function VocabScreen() {
                 className="p-3 bg-primary/10 rounded-lg border border-dashed border-primary/30"
                 onPress={() => setIsAdding(true)}
               >
-                <Text className="text-center text-primary font-medium">+ Create New Vocabulary Set</Text>
+                <Text className="text-center text-primary font-medium">+ Tambah Koleksi Kosa-kata</Text>
               </Pressable>
             )}
           </View>

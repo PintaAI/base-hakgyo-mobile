@@ -7,3 +7,5 @@ export { HtmlRenderer } from './html-renderer';
 export { UserStats } from './user-stats';
 export { JoinedKelasList } from './joined-kelas-list';
 export { DailyVocab } from './daily-vocab';
+export { VocabSetCard } from './vocab-set-card';
+export { IconRenderer } from './icon-renderer';

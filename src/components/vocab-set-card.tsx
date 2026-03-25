@@ -1,5 +1,6 @@
 import { VocabularySet } from 'hakgyo-expo-sdk';
 import { Pressable, Text, View } from 'react-native';
+import { IconRenderer } from './icon-renderer';
 
 interface VocabSetCardProps {
   set: VocabularySet;
@@ -9,16 +10,6 @@ interface VocabSetCardProps {
 }
 
 export function VocabSetCard({ set, onPress, onLongPress, isUserOwned = false }: VocabSetCardProps) {
-  // Map icon names to display (could be expanded with actual icon components)
-  const getIconDisplay = (iconName: string | null | undefined): string => {
-    const iconMap: Record<string, string> = {
-      FaBookOpen: '📖',
-      FaBook: '📕',
-      FaCar: '🚗',
-    };
-    return iconName && iconMap[iconName] ? iconMap[iconName] : '📚';
-  };
-  
   const itemCount = set.itemCount ?? 0;
   const learnedCount = set.learnedCount ?? 0;
   const progressPercentage = itemCount > 0 ? Math.round((learnedCount / itemCount) * 100) : 0;
@@ -31,7 +22,7 @@ export function VocabSetCard({ set, onPress, onLongPress, isUserOwned = false }:
     >
       <View className="flex-row items-start gap-3">
         <View className="w-10 h-10 items-center justify-center rounded-lg border border-border bg-background">
-          <Text className="text-xl">{getIconDisplay(set.icon)}</Text>
+          <IconRenderer name={set.icon} size={20} />
         </View>
         <View className="flex-1">
           <Text className="text-lg font-semibold text-foreground" numberOfLines={1}>

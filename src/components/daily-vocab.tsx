@@ -3,7 +3,7 @@ import { View, Text, FlatList, ActivityIndicator, Pressable, Animated, useColorS
 import { vocabularyApi, VocabularyItem } from 'hakgyo-expo-sdk';
 import { useAuth } from 'hakgyo-expo-sdk';
 import { useEffect, useState, useCallback, useRef } from 'react';
-import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
+import { AlertCircle, BookOpen } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 
 function VocabCard({ item, theme }: { item: VocabularyItem; theme: typeof Colors.light | typeof Colors.dark }) {
@@ -175,7 +175,7 @@ export function DailyVocab() {
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <FontAwesome name="exclamation-circle" size={20} color={theme.destructive} />
+          <AlertCircle size={20} color={theme.destructive} />
           <Text style={{ color: theme.destructive, fontSize: 14 }}>{error}</Text>
         </View>
       </View>
@@ -209,7 +209,7 @@ export function DailyVocab() {
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <FontAwesome name="book" size={18} color={theme.primary} />
+          <BookOpen size={18} color={theme.primary} />
           <Text style={{ fontWeight: '600', fontSize: 16, color: theme.foreground }}>
             Kosa Kata Harian
           </Text>
