@@ -183,11 +183,17 @@ export function MenuHeader({
   }, [dailyLoginState, fadeAnim, scaleAnim, subtitleFadeAnim]);
 
   const containerClass = centerAlign
-    ? "px-5 bg-background dark:bg-muted pb-3 flex-row items-start justify-center"
-    : "px-5 bg-background dark:bg-muted pb-3 flex-row items-start justify-between";
+    ? "px-5 pb-3 flex-row items-start justify-center"
+    : "px-5 pb-3 flex-row items-start justify-between";
+
+  // Gradient from background color (top 90%) to transparent (bottom 10%)
+  const gradientBackground = {
+    paddingTop: insetEnabled ? insets.top : 15,
+    experimental_backgroundImage: `linear-gradient(to bottom, ${theme.background} 0%, ${theme.background} 60%, transparent 100%)`,
+  };
 
   return (
-    <View className={containerClass} style={{ paddingTop: insetEnabled ? insets.top : 15 }}>
+    <View className={containerClass} style={gradientBackground}>
       {(leftIconName || leftIconImage) && (
         <View className="p-2 -ml-2 rounded-lg bg-primary/10">
           {leftIconImage ? (
@@ -321,7 +327,7 @@ export function MenuHeader({
       {rightIconName && (
         <Pressable
           onPress={onRightIconPress}
-          className="p-2 -mr-2"
+          className="p-2 -mr-0 -mt-2"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <SymbolView

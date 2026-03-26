@@ -1,24 +1,31 @@
 import React from 'react';
-import { View, Text, FlatList, ActivityIndicator, Pressable, Animated, useColorScheme } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, Pressable, Animated, useColorScheme, TextInput, Keyboard } from 'react-native';
 import { vocabularyApi, VocabularyItem } from 'hakgyo-expo-sdk';
 import { useAuth } from 'hakgyo-expo-sdk';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { AlertCircle, BookOpen } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
 
-function VocabCard({ item, theme }: { item: VocabularyItem; theme: typeof Colors.light | typeof Colors.dark }) {
-  const [isFlipped, setIsFlipped] = useState(false);
+interface VocabCardProps {
+  item: VocabularyItem;
+  theme: typeof Colors.light | typeof Colors.dark;
+  isFlipped: boolean;
+  isWrong: boolean;
+  shakeAnimation: Animated.Value;
+  onFlip: () => void;
+}
+
+function VocabCard({ item, theme, isFlipped, isWrong, shakeAnimation, onFlip }: VocabCardProps) {
   const flipAnimation = useRef(new Animated.Value(0)).current;
 
-  const handleFlip = () => {
+  useEffect(() => {
     Animated.spring(flipAnimation, {
-      toValue: isFlipped ? 0 : 1,
+      toValue: isFlipped ? 1 : 0,
       friction: 8,
       tension: 10,
       useNativeDriver: true,
     }).start();
-    setIsFlipped(!isFlipped);
-  };
+  }, [isFlipped, flipAnimation]);
 
   const frontInterpolate = flipAnimation.interpolate({
     inputRange: [0, 1],
@@ -31,7 +38,13 @@ function VocabCard({ item, theme }: { item: VocabularyItem; theme: typeof Colors
   });
 
   const frontAnimatedStyle = {
-    transform: [{ rotateY: frontInterpolate }],
+    transform: [
+      { rotateY: frontInterpolate },
+      { translateX: shakeAnimation.interpolate({
+        inputRange: [-1, 0, 1],
+        outputRange: [-10, 0, 10],
+      })},
+    ],
   };
 
   const backAnimatedStyle = {
@@ -39,7 +52,7 @@ function VocabCard({ item, theme }: { item: VocabularyItem; theme: typeof Colors
   };
 
   return (
-    <Pressable onPress={handleFlip} style={{ width: 350, height: 100 }}>
+    <Pressable onPress={onFlip} style={{ width: 350, height: 100 }}>
       <View style={{ flex: 1, position: 'relative' }}>
         {/* Front Side - Korean Word */}
         <Animated.View
@@ -48,7 +61,7 @@ function VocabCard({ item, theme }: { item: VocabularyItem; theme: typeof Colors
             {
               position: 'absolute',
               inset: 0,
-              backgroundColor: theme.primary,
+              backgroundColor: isWrong ? theme.destructive : theme.primary,
               borderRadius: 12,
               borderWidth: 1,
               borderColor: theme.border,
@@ -108,6 +121,16 @@ export function DailyVocab() {
   const [vocabItems, setVocabItems] = useState<VocabularyItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
+  const [guess, setGuess] = useState('');
+  const [isWrong, setIsWrong] = useState(false);
+  
+  const shakeAnimation = useRef(new Animated.Value(0)).current;
+  const flatListRef = useRef<FlatList>(null);
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 50,
+  }).current;
 
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -141,6 +164,69 @@ export function DailyVocab() {
   useEffect(() => {
     fetchDailyVocab();
   }, [fetchDailyVocab]);
+
+  // Reset guess when card changes
+  useEffect(() => {
+    setGuess('');
+    setIsWrong(false);
+  }, [currentIndex]);
+
+  const handleViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: Array<{ item: VocabularyItem; index: number | null }> }) => {
+    if (viewableItems.length > 0 && viewableItems[0].index !== null) {
+      setCurrentIndex(viewableItems[0].index);
+    }
+  }).current;
+
+  const shakeCard = () => {
+    setIsWrong(true);
+    Animated.sequence([
+      Animated.timing(shakeAnimation, { toValue: 1, duration: 100, useNativeDriver: true }),
+      Animated.timing(shakeAnimation, { toValue: -1, duration: 100, useNativeDriver: true }),
+      Animated.timing(shakeAnimation, { toValue: 1, duration: 100, useNativeDriver: true }),
+      Animated.timing(shakeAnimation, { toValue: -1, duration: 100, useNativeDriver: true }),
+      Animated.timing(shakeAnimation, { toValue: 0, duration: 100, useNativeDriver: true }),
+    ]).start(() => {
+      setTimeout(() => setIsWrong(false), 500);
+    });
+  };
+
+  const flipCard = () => {
+    const currentItemId = vocabItems[currentIndex]?.id;
+    if (currentItemId !== undefined) {
+      setFlippedCards(prev => new Set(prev).add(currentItemId));
+    }
+  };
+
+  const handleGuess = () => {
+    const currentItem = vocabItems[currentIndex];
+    if (!currentItem) return;
+    
+    const normalizedGuess = guess.trim().toLowerCase();
+    const normalizedAnswer = currentItem.indonesian.trim().toLowerCase();
+    
+    if (normalizedGuess === normalizedAnswer) {
+      Keyboard.dismiss();
+      flipCard();
+    } else {
+      shakeCard();
+    }
+  };
+
+  const handleFlip = () => {
+    const currentItemId = vocabItems[currentIndex]?.id;
+    if (currentItemId === undefined) return;
+    
+    if (flippedCards.has(currentItemId)) {
+      // Unflip
+      setFlippedCards(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(currentItemId);
+        return newSet;
+      });
+    } else {
+      flipCard();
+    }
+  };
 
   if (isLoading) {
     return (
@@ -186,8 +272,12 @@ export function DailyVocab() {
     return null;
   }
 
+  const currentItem = vocabItems[currentIndex];
+  const isCurrentCardFlipped = currentItem ? flippedCards.has(currentItem.id) : false;
+
   return (
     <View
+      className='shadow'
       style={{
         backgroundColor: theme.card,
         borderRadius: 12,
@@ -231,18 +321,54 @@ export function DailyVocab() {
       {/* Horizontal FlatList */}
       <View style={{ paddingVertical: 12 }}>
         <FlatList
+          ref={flatListRef}
           data={vocabItems}
           keyExtractor={(item) => String(item.id)}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 12 }}
           ItemSeparatorComponent={() => <View style={{ width: 14 }} />}
-          snapToInterval={367}
+          snapToInterval={364}
           snapToAlignment="start"
           decelerationRate="fast"
-          renderItem={({ item }) => <VocabCard item={item} theme={theme} />}
+          onViewableItemsChanged={handleViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          renderItem={({ item, index }) => (
+            <VocabCard
+              item={item}
+              theme={theme}
+              isFlipped={flippedCards.has(item.id)}
+              isWrong={index === currentIndex && isWrong}
+              shakeAnimation={index === currentIndex ? shakeAnimation : new Animated.Value(0)}
+              onFlip={handleFlip}
+            />
+          )}
         />
       </View>
+
+      {/* Guess Input - Outside FlatList */}
+      {currentItem && !isCurrentCardFlipped && (
+        <View style={{ paddingHorizontal: 12, paddingBottom: 16 }}>
+          <TextInput
+            style={{
+              backgroundColor: theme.background,
+              borderWidth: 1,
+              borderColor: isWrong ? theme.destructive : theme.border,
+              borderRadius: 8,
+              paddingHorizontal: 12,
+              paddingVertical: 10,
+              fontSize: 14,
+              color: theme.foreground,
+            }}
+            placeholder="Tebak artinya..."
+            placeholderTextColor={theme.mutedForeground}
+            value={guess}
+            onChangeText={setGuess}
+            onSubmitEditing={handleGuess}
+            returnKeyType="done"
+          />
+        </View>
+      )}
     </View>
   );
 }

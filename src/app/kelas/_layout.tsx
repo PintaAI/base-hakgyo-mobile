@@ -22,7 +22,7 @@ export default function KelasLayout() {
       <Stack.Screen
         name="[kelasid]"
         options={{
-          title: 'Class Details',
+          headerShown: false,
         }}
       />
     </Stack>

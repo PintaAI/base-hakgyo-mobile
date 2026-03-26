@@ -4,7 +4,7 @@ import { useDailyLogin } from '@/hooks/use-daily-login';
 import { useAuth, Kelas } from 'hakgyo-expo-sdk';
 import { router } from 'expo-router';
 import React, { useEffect, useRef, useMemo } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, View, KeyboardAvoidingView, Platform } from 'react-native';
 
 export default function MenuScreen() {
   const { user, refreshSession } = useAuth();
@@ -46,30 +46,37 @@ export default function MenuScreen() {
   const selectedKelasId = selectedKelas ? String(selectedKelas.id) : 'all';
 
   return (
-    <View className="flex-1 ">
-      <Background />
-      <MenuHeader
-        title={selectedKelas?.title ?? 'Hakgyo'}
-        subtitle={user?.name ? `안녕하세요, ${user.name}!` : '안녕하세요!'}
-        leftIconImage={require('@/assets/images/favicon.png')}
-        rightIconName="bell"
-        onRightIconPress={() => router.push('/notification')}
-        dailyLoginState={{
-          isLoading,
-          xpEarned: result?.xpEarned,
-          streak: result?.streak,
-          levelsGained: result?.levelsGained,
-          streakMilestoneReached: result?.streakMilestoneReached,
-        }}
-        submenu={kelasSubmenuItems.length > 0}
-        submenuItems={kelasSubmenuItems}
-        selectedSubmenuId={selectedKelasId}
-        onSubmenuChange={handleKelasChange}
-      />
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
+      <View className="flex-1 ">
+        <Background />
+        <MenuHeader
+          title={selectedKelas?.title ?? 'Hakgyo'}
+          subtitle={user?.name ? `안녕하세요, ${user.name}!` : '안녕하세요!'}
+          leftIconImage={require('@/assets/images/favicon.png')}
+          rightIconName="bell"
+          onRightIconPress={() => router.push('/notification')}
+          dailyLoginState={{
+            isLoading,
+            xpEarned: result?.xpEarned,
+            streak: result?.streak,
+            levelsGained: result?.levelsGained,
+            streakMilestoneReached: result?.streakMilestoneReached,
+          }}
+          submenu={kelasSubmenuItems.length > 0}
+          submenuItems={kelasSubmenuItems}
+          selectedSubmenuId={selectedKelasId}
+          onSubmenuChange={handleKelasChange}
+        />
         <ScrollView
           className="flex-1 px-2 pt-5"
           contentInsetAdjustmentBehavior="automatic"
-          contentContainerStyle={{ gap: 10 }}
+          contentContainerStyle={{ gap: 10, paddingBottom: 100 }}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
         >
           {user && (
             <UserStats
@@ -82,6 +89,7 @@ export default function MenuScreen() {
           
           <DailyVocab />
         </ScrollView>
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
