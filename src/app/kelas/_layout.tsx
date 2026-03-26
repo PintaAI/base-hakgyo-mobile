@@ -25,6 +25,13 @@ export default function KelasLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="[kelasid]/[materiid]"
+        options={{
+          title: 'Material',
+          headerShown: true,
+        }}
+      />
     </Stack>
   );
 }

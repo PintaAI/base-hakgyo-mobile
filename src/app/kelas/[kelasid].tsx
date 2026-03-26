@@ -1,5 +1,5 @@
 import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Kelas, kelasApi } from 'hakgyo-expo-sdk';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from 'react-native';
@@ -23,6 +23,7 @@ const KELAS_TYPE_ICONS: Record<string, string> = {
 
 export default function KelasDetailScreen() {
   const { kelasid } = useLocalSearchParams<{ kelasid: string }>();
+  const router = useRouter();
   const kelasId = Number(kelasid);
   const [kelas, setKelas] = useState<Kelas | null>(null);
   const [loading, setLoading] = useState(true);
@@ -202,9 +203,10 @@ export default function KelasDetailScreen() {
             </Text>
             <View className="bg-card rounded-xl border border-border overflow-hidden">
               {kelas.materis.map((materi, index) => (
-                <View
+                <Pressable
                   key={materi.id}
-                  className={`flex-row items-center gap-3 p-3 ${index < kelas.materis!.length - 1 ? 'border-b border-border' : ''}`}
+                  onPress={() => router.push(`/kelas/${kelasId}/${materi.id}`)}
+                  className={`flex-row items-center gap-3 p-3 active:bg-muted/50 ${index < kelas.materis!.length - 1 ? 'border-b border-border' : ''}`}
                 >
                   <View className={`w-8 h-8 rounded-lg items-center justify-center ${materi.isDemo ? 'bg-info-muted' : 'bg-muted'}`}>
                     <FontAwesome name={materi.isDemo ? 'play' : 'lock'} size={12} color={materi.isDemo ? '#2563eb' : '#6b7280'} />
@@ -218,7 +220,8 @@ export default function KelasDetailScreen() {
                       <Text className="text-xs font-semibold text-info">FREE</Text>
                     </View>
                   )}
-                </View>
+                  <FontAwesome name="chevron-right" size={12} color="#6b7280" />
+                </Pressable>
               ))}
             </View>
           </View>
