@@ -1,11 +1,11 @@
 import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
-import { useAuth } from 'hakgyo-expo-sdk';
 import { router } from 'expo-router';
+import { useAuth } from 'hakgyo-expo-sdk';
 import React, { useMemo } from 'react';
-import { ScrollView, Text, View, useColorScheme, Pressable } from 'react-native';
+import { Pressable, ScrollView, Text, View, useColorScheme } from 'react-native';
 
-import { Background } from '@/components/themed-background';
 import { JoinedKelasList } from '@/components/joined-kelas-list';
+import { Background } from '@/components/themed-background';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Colors } from '@/constants/theme';
 import { useKelas } from '@/contexts/kelas-context';
@@ -230,11 +230,11 @@ export default function ProfileScreen() {
             error={error}
           />
 
-          {/* Logout Button */}
+          {/* Login/Logout Button */}
           <Pressable
-            onPress={handleSignOut}
+            onPress={user ? handleSignOut : () => router.push('/auth')}
             style={{
-              backgroundColor: theme.destructive,
+              backgroundColor: user ? theme.destructive : theme.primary,
               paddingVertical: 14,
               paddingHorizontal: 24,
               borderRadius: 12,
@@ -245,9 +245,9 @@ export default function ProfileScreen() {
               gap: 8,
             }}
           >
-            <FontAwesome name="sign-out" size={16} color="#FFFFFF" />
+            <FontAwesome name={user ? 'sign-out' : 'sign-in'} size={16} color="#FFFFFF" />
             <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 16 }}>
-              Logout
+              {user ? 'Logout' : 'Login'}
             </Text>
           </Pressable>
         </View>

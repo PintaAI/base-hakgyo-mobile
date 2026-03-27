@@ -1,6 +1,6 @@
 import { Colors } from '@/constants/theme';
 import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import { Kelas } from 'hakgyo-expo-sdk';
 import React from 'react';
 import { ActivityIndicator, Image, Pressable, Text, useColorScheme, View } from 'react-native';
@@ -52,7 +52,7 @@ export function JoinedKelasList({ joinedKelas, isLoading, error }: JoinedKelasLi
       <View style={{ paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: theme.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <FontAwesome name="graduation-cap" size={18} color={theme.primary} />
-          <Text style={{ fontWeight: '600', fontSize: 16, color: theme.foreground }}>My Classes</Text>
+          <Text style={{ fontWeight: '600', fontSize: 16, color: theme.foreground }}>Kelas ku</Text>
         </View>
         <View style={{ backgroundColor: theme.primary + '1A', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999 }}>
           <Text style={{ fontSize: 12, fontWeight: '600', color: theme.primary }}>{joinedKelas.length}</Text>

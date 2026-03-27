@@ -1,18 +1,20 @@
 import { Colors } from '@/constants/theme';
-import { Soal, soalApi, useAuth } from 'hakgyo-expo-sdk';
+import { gamificationApi, Soal, soalApi, useAuth } from 'hakgyo-expo-sdk';
 import { AlertCircle, BookOpen, CheckCircle, ChevronRight, X, XCircle } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, useColorScheme, View } from 'react-native';
 import { QuizViewer } from './quiz-viewer';
 
 export function DailySoal() {
-  const { user } = useAuth();
+  const { user, refreshSession } = useAuth();
   const [questions, setQuestions] = useState<Soal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasCompleted, setHasCompleted] = useState(false);
   const [score, setScore] = useState<{ correct: number; total: number } | null>(null);
+  const [xpEarned, setXpEarned] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -52,14 +54,41 @@ export function DailySoal() {
     setIsExpanded(false);
   };
 
-  const handleFinish = (correct: number, total: number) => {
+  const handleFinish = async (correct: number, total: number) => {
     setScore({ correct, total });
     setHasCompleted(true);
+    
+    // Award XP for completing the quiz
+    if (user?.id) {
+      try {
+        setIsSubmitting(true);
+        const result = await gamificationApi.processEvent({
+          event: 'COMPLETE_SOAL',
+          metadata: {
+            totalQuestions: total,
+            correctAnswers: correct,
+            score: Math.round((correct / total) * 100),
+          },
+          userTimeZone: 'Asia/Seoul', // User's timezone for streak calculation
+        });
+        
+        if (result.success && result.data) {
+          setXpEarned(result.data.totalXP);
+          // Refresh user session to get updated XP and level
+          refreshSession();
+        }
+      } catch (err) {
+        console.error('Failed to process gamification event:', err);
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
   };
 
   const handleRestart = () => {
     setHasCompleted(false);
     setScore(null);
+    setXpEarned(null);
     setIsExpanded(false);
   };
 
@@ -157,6 +186,7 @@ export function DailySoal() {
             questions={questions}
             mode="practice"
             passingScore={60}
+            onComplete={(result) => handleFinish(result.correct, result.total)}
           />
         </View>
       </View>
@@ -211,6 +241,27 @@ export function DailySoal() {
           <Text style={{ color: theme.mutedForeground, fontSize: 14, marginTop: 4 }}>
             {score.correct} dari {score.total} soal benar
           </Text>
+          
+          {/* XP Earned */}
+          {xpEarned !== null && (
+            <View
+              style={{
+                marginTop: 8,
+                paddingHorizontal: 12,
+                paddingVertical: 4,
+                borderRadius: 999,
+                backgroundColor: theme.primary + '1A',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 4,
+              }}
+            >
+              <Text style={{ fontSize: 14, fontWeight: '600', color: theme.primary }}>
+                +{xpEarned} XP
+              </Text>
+            </View>
+          )}
+          
           <View
             style={{
               marginTop: 12,
@@ -296,9 +347,7 @@ export function DailySoal() {
 
       {/* Preview Content */}
       <View style={{ padding: 16 }}>
-        <Text style={{ color: theme.mutedForeground, fontSize: 14, marginBottom: 12 }}>
-          Latihan soal harian untuk menguji pemahamanmu. Selesaikan semua soal untuk mendapatkan XP!
-        </Text>
+
         
         {/* Question Preview */}
         <View

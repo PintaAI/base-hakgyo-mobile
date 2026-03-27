@@ -1,10 +1,8 @@
-import React from 'react';
-import { View, Text, FlatList, ActivityIndicator, Pressable, Animated, useColorScheme, TextInput, Keyboard } from 'react-native';
-import { vocabularyApi, VocabularyItem } from 'hakgyo-expo-sdk';
-import { useAuth } from 'hakgyo-expo-sdk';
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { AlertCircle, BookOpen } from 'lucide-react-native';
 import { Colors } from '@/constants/theme';
+import { useAuth, vocabularyApi, VocabularyItem } from 'hakgyo-expo-sdk';
+import { AlertCircle, BookOpen } from 'lucide-react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, FlatList, Keyboard, Pressable, Text, TextInput, useColorScheme, View } from 'react-native';
 
 interface VocabCardProps {
   item: VocabularyItem;
@@ -277,7 +275,6 @@ export function DailyVocab() {
 
   return (
     <View
-      className='shadow'
       style={{
         backgroundColor: theme.card,
         borderRadius: 12,

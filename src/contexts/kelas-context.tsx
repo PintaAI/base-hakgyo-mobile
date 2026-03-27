@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { userApi, Kelas, useSession } from 'hakgyo-expo-sdk';
+import { Kelas, userApi, useSession } from 'hakgyo-expo-sdk';
+import React, { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
 const SELECTED_KELAS_KEY = 'hakgyo_selected_kelas';
+const SELECTED_KELAS_ALL = 'all'; // Sentinel value for "Semua Kelas" selection
 
 interface KelasContextValue {
   /** List of kelas the user has joined */
@@ -39,6 +40,11 @@ export function KelasProvider({ children }: KelasProviderProps) {
     try {
       const persistedId = await AsyncStorage.getItem(SELECTED_KELAS_KEY);
       if (persistedId && kelasList.length > 0) {
+        // Check if user explicitly selected "Semua Kelas" (all)
+        if (persistedId === SELECTED_KELAS_ALL) {
+          setSelectedKelasState(null);
+          return null;
+        }
         const kelasId = parseInt(persistedId, 10);
         const found = kelasList.find(k => k.id === kelasId);
         if (found) {
@@ -94,7 +100,8 @@ export function KelasProvider({ children }: KelasProviderProps) {
     if (kelas) {
       await AsyncStorage.setItem(SELECTED_KELAS_KEY, String(kelas.id));
     } else {
-      await AsyncStorage.removeItem(SELECTED_KELAS_KEY);
+      // Store 'all' sentinel to persist "Semua Kelas" selection across sessions
+      await AsyncStorage.setItem(SELECTED_KELAS_KEY, SELECTED_KELAS_ALL);
     }
   }, []);
 
@@ -145,3 +152,4 @@ export function useKelas(): KelasContextValue {
 }
 
 export { KelasContext };
+

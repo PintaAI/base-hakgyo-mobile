@@ -16,6 +16,7 @@ interface SubmenuItem {
   id: string;
   label: string;
   icon?: SFSymbol;
+  thumbnail?: string;
 }
 
 interface MenuHeaderProps {
@@ -258,15 +259,21 @@ export function MenuHeader({
                 onPress={() => handleSubmenuPress(item)}
                 className={`flex-row items-center gap-2 px-4 py-3 ${index === 0 ? 'rounded-t-lg' : ''} ${index === submenuItems.length - 1 ? 'rounded-b-lg' : ''} ${item.id === selectedSubmenuId ? 'bg-primary/10' : ''}`}
               >
-                {item.icon && (
+                {item.thumbnail ? (
+                  <Image
+                    source={{ uri: item.thumbnail }}
+                    style={{ width: 28, height: 28, borderRadius: 6 }}
+                    resizeMode="cover"
+                  />
+                ) : item.icon ? (
                   <SymbolView
                     name={item.icon}
                     size={18}
                     tintColor={item.id === selectedSubmenuId ? theme.primary : theme.foreground}
                   />
-                )}
+                ) : null}
                 <Text
-                  className={`text-base ${item.id === selectedSubmenuId ? 'text-primary font-semibold' : 'text-foreground'}`}
+                  className={`text-base flex-1 ${item.id === selectedSubmenuId ? 'text-primary font-semibold' : 'text-foreground'}`}
                 >
                   {item.label}
                 </Text>

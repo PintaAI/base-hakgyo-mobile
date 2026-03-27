@@ -1,10 +1,10 @@
-import { Background, MenuHeader, UserStats, DailyVocab } from '@/components';
+import { Background, DailySoal, DailyVocab, MenuHeader, UserStats } from '@/components';
 import { useKelas } from '@/contexts/kelas-context';
 import { useDailyLogin } from '@/hooks/use-daily-login';
-import { useAuth, Kelas } from 'hakgyo-expo-sdk';
 import { router } from 'expo-router';
-import React, { useEffect, useRef, useMemo } from 'react';
-import { ScrollView, View, KeyboardAvoidingView, Platform } from 'react-native';
+import { useAuth } from 'hakgyo-expo-sdk';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 
 export default function MenuScreen() {
   const { user, refreshSession } = useAuth();
@@ -27,6 +27,7 @@ export default function MenuScreen() {
     ...joinedKelas.map(kelas => ({
       id: String(kelas.id),
       label: kelas.title,
+      thumbnail: kelas.thumbnail,
     })),
   ], [joinedKelas]);
 
@@ -77,6 +78,7 @@ export default function MenuScreen() {
           contentContainerStyle={{ gap: 10, paddingBottom: 100 }}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive"
+          showsVerticalScrollIndicator={false}
         >
           {user && (
             <UserStats
@@ -86,8 +88,9 @@ export default function MenuScreen() {
               xp={user.xp ?? 0}
             />
           )}
-          
           <DailyVocab />
+          <DailySoal />
+
         </ScrollView>
       </View>
     </KeyboardAvoidingView>

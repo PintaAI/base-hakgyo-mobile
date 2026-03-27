@@ -1,11 +1,13 @@
-export { KoleksiSoalCard } from './koleksi-soal-card';
-export { Background } from './themed-background';
-export { MenuHeader } from './menu-header';
-export { TryoutCard } from './tryout-card';
-export { QuizViewer } from './quiz-viewer';
-export { HtmlRenderer } from './html-renderer';
-export { UserStats } from './user-stats';
-export { JoinedKelasList } from './joined-kelas-list';
+export { DailySoal } from './daily-soal';
 export { DailyVocab } from './daily-vocab';
-export { VocabSetCard } from './vocab-set-card';
+export { HtmlRenderer } from './html-renderer';
 export { IconRenderer } from './icon-renderer';
+export { JoinedKelasList } from './joined-kelas-list';
+export { KoleksiSoalCard } from './koleksi-soal-card';
+export { MenuHeader } from './menu-header';
+export { QuizViewer } from './quiz-viewer';
+export { Background } from './themed-background';
+export { TryoutCard } from './tryout-card';
+export { UserStats } from './user-stats';
+export { VocabSetCard } from './vocab-set-card';
+

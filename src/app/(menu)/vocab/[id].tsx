@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { useAuth, vocabularyApi, VocabularyItem, VocabularySet } from 'hakgyo-expo-sdk';
+import { useAuth, vocabularyApi, VocabularyItem, VocabularySet} from 'hakgyo-expo-sdk';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
@@ -9,6 +9,7 @@ export default function VocabDetailScreen() {
   const setId = Number(id);
   const [vocabSet, setVocabSet] = useState<VocabularySet | null>(null);
   const [vocabItems, setVocabItems] = useState<VocabularyItem[]>([]);
+  const [learnedStatus, setLearnedStatus] = useState<Record<number, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedItem, setExpandedItem] = useState<number | null>(null);
@@ -16,6 +17,7 @@ export default function VocabDetailScreen() {
   const [newKorean, setNewKorean] = useState('');
   const [newIndonesian, setNewIndonesian] = useState('');
   const [adding, setAdding] = useState(false);
+  const [togglingLearned, setTogglingLearned] = useState<number | null>(null);
 
   useEffect(() => {
     if (setId) {
@@ -28,16 +30,20 @@ export default function VocabDetailScreen() {
       setLoading(true);
       setError(null);
 
-      // Fetch the vocabulary set
+      // Fetch the vocabulary set (includes items with isLearned for authenticated users)
       const setResponse = await vocabularyApi.getSet(setId);
       setVocabSet(setResponse.data || null);
 
-      // Fetch items in the set
-      const itemsResponse = await vocabularyApi.listItems({
-        collectionId: String(setId),
-        limit: 100,
+      // Items are now included in the set response with isLearned field
+      const items = setResponse.data?.items || [];
+      setVocabItems(items);
+      
+      // Initialize learned status from items (isLearned is now provided by API)
+      const statusMap: Record<number, boolean> = {};
+      items.forEach((item: VocabularyItem) => {
+        statusMap[item.id] = item.isLearned ?? false;
       });
-      setVocabItems(itemsResponse.data || []);
+      setLearnedStatus(statusMap);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load vocabulary set');
       console.error('Error fetching vocab set:', err);
@@ -75,6 +81,32 @@ export default function VocabDetailScreen() {
       setError(err instanceof Error ? err.message : 'Failed to add vocabulary item');
     } finally {
       setAdding(false);
+    }
+  };
+
+  const toggleLearned = async (itemId: number) => {
+    const currentStatus = learnedStatus[itemId] || false;
+    try {
+      setTogglingLearned(itemId);
+      const response = await vocabularyApi.setLearnedStatus(itemId, !currentStatus);
+      if (response.data && response.data.isLearned !== undefined) {
+        setLearnedStatus(prev => ({
+          ...prev,
+          [itemId]: response.data!.isLearned,
+        }));
+        // Update vocabSet learned count
+        if (vocabSet) {
+          const newLearnedCount = !currentStatus
+            ? (vocabSet.learnedCount || 0) + 1
+            : Math.max(0, (vocabSet.learnedCount || 0) - 1);
+          setVocabSet({ ...vocabSet, learnedCount: newLearnedCount });
+        }
+      }
+    } catch (err) {
+      console.error('Error toggling learned status:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update learned status');
+    } finally {
+      setTogglingLearned(null);
     }
   };
 
@@ -117,7 +149,7 @@ export default function VocabDetailScreen() {
               )}
             </View>
             <Text className="text-sm text-muted-foreground ml-2">
-              {vocabItems.length} words
+              {vocabSet.itemCount ?? vocabItems.length} words
             </Text>
           </View>
           {vocabSet.learnedCount !== undefined && vocabSet.itemCount !== undefined && (
@@ -195,12 +227,14 @@ export default function VocabDetailScreen() {
           ) : (
             vocabItems.map((item) => {
               const isExpanded = expandedItem === item.id;
+              const isLearned = learnedStatus[item.id] || false;
+              const isToggling = togglingLearned === item.id;
 
               return (
                 <Pressable
                   key={item.id}
                   onPress={() => toggleExpand(item.id)}
-                  className="p-4 bg-card rounded-lg border shadow border-border"
+                  className={`p-4 rounded-lg border shadow ${isLearned ? 'bg-green-100 dark:bg-green-900/30 border-green-300 dark:border-green-700' : 'bg-card border-border'}`}
                 >
                   <View className="flex-row justify-between items-start">
                     <View className="flex-1">
@@ -211,6 +245,18 @@ export default function VocabDetailScreen() {
                         {item.indonesian}
                       </Text>
                     </View>
+                    <Pressable
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        toggleLearned(item.id);
+                      }}
+                      disabled={isToggling}
+                      className={`px-3 py-1.5 rounded-full ${isLearned ? 'bg-green-500' : 'bg-muted'}`}
+                    >
+                      <Text className={`text-xs font-medium ${isLearned ? 'text-white' : 'text-muted-foreground'}`}>
+                        {isToggling ? '...' : isLearned ? '✓ Learned' : 'Mark Learned'}
+                      </Text>
+                    </Pressable>
                   </View>
 
                   {/* Expanded Details */}

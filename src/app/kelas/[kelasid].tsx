@@ -5,6 +5,8 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { HtmlRenderer } from '@/components/html-renderer';
+import { useKelas } from '@/contexts/kelas-context';
+import { useTheme } from '@/hooks/use-theme';
 
 const KELAS_LEVEL_COLORS: Record<string, string> = {
   BEGINNER: '#22c55e',
@@ -24,6 +26,8 @@ const KELAS_TYPE_ICONS: Record<string, string> = {
 export default function KelasDetailScreen() {
   const { kelasid } = useLocalSearchParams<{ kelasid: string }>();
   const router = useRouter();
+  const { setSelectedKelas } = useKelas();
+  const theme = useTheme();
   const kelasId = Number(kelasid);
   const [kelas, setKelas] = useState<Kelas | null>(null);
   const [loading, setLoading] = useState(true);
@@ -77,6 +81,17 @@ export default function KelasDetailScreen() {
 
   const levelColor = KELAS_LEVEL_COLORS[kelas.level] || '#6b7280';
   const typeIcon = KELAS_TYPE_ICONS[kelas.type] || 'book';
+
+  // Navigate to soal/vocab with kelas selection
+  const handleNavigateToSoal = () => {
+    setSelectedKelas(kelas);
+    router.push('/(menu)/soal');
+  };
+
+  const handleNavigateToVocab = () => {
+    setSelectedKelas(kelas);
+    router.push('/(menu)/vocab');
+  };
 
   return (
     <ScrollView className="flex-1" contentInsetAdjustmentBehavior="automatic">
@@ -192,6 +207,26 @@ export default function KelasDetailScreen() {
                 </Text>
               </View>
             )}
+          </View>
+        </View>
+
+        {/* Soal & Vocab Buttons */}
+        <View className="px-4 py-2">
+          <View className="flex-row gap-3">
+            <Pressable
+              onPress={handleNavigateToSoal}
+              className="flex-1 flex-row items-center justify-center gap-2 bg-primary rounded-xl py-3 active:opacity-80"
+            >
+              <FontAwesome name="pencil-square" size={16} color={theme.primaryForeground} />
+              <Text className="text-primary-foreground font-semibold">Bank Soal</Text>
+            </Pressable>
+            <Pressable
+              onPress={handleNavigateToVocab}
+              className="flex-1 flex-row items-center justify-center gap-2 bg-secondary rounded-xl py-3 active:opacity-80"
+            >
+              <FontAwesome name="book" size={16} color={theme.secondaryForeground} />
+              <Text className="text-secondary-foreground font-semibold">Kosakata</Text>
+            </Pressable>
           </View>
         </View>
 

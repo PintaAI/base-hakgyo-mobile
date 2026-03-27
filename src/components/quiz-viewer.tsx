@@ -1,5 +1,5 @@
-import { Opsi, Soal, TryoutResult, TryoutAnswer } from 'hakgyo-expo-sdk';
-import React, { useEffect, useRef, useState } from 'react';
+import { Opsi, Soal, TryoutAnswer, TryoutResult } from 'hakgyo-expo-sdk';
+import React, { useRef, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { HtmlRenderer } from './html-renderer';
 
@@ -17,13 +17,14 @@ interface QuizViewerProps {
   questions: Soal[];
   mode?: 'practice' | 'tryout';
   onSubmit?: (answers: SubmitAnswer[]) => Promise<TryoutResult | null>;
+  onComplete?: (score: { correct: number; total: number; percentage: number }) => void;
   passingScore?: number;
   initialResult?: InitialResultData | null;
 }
 
 type UserAnswers = Record<number, number | null>;
 
-export function QuizViewer({ questions, mode = 'practice', onSubmit, passingScore, initialResult }: QuizViewerProps) {
+export function QuizViewer({ questions, mode = 'practice', onSubmit, onComplete, passingScore, initialResult }: QuizViewerProps) {
   const { width: windowWidth } = useWindowDimensions();
   const [listWidth, setListWidth] = useState(windowWidth);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -87,6 +88,15 @@ export function QuizViewer({ questions, mode = 'practice', onSubmit, passingScor
           setTryoutResult(result);
         }
         setShowResults(true);
+        
+        // Call onComplete callback if provided
+        if (onComplete && result) {
+          onComplete({
+            correct: result.correctCount,
+            total: questions.length,
+            percentage: result.score,
+          });
+        }
       } catch (error: any) {
         Alert.alert(
           'Submission Failed',
@@ -99,6 +109,17 @@ export function QuizViewer({ questions, mode = 'practice', onSubmit, passingScor
     } else {
       // In practice mode, show results directly
       setShowResults(true);
+      
+      // Call onComplete callback if provided
+      if (onComplete) {
+        const correct = calculateScore();
+        const percentage = Math.round((correct / questions.length) * 100);
+        onComplete({
+          correct,
+          total: questions.length,
+          percentage,
+        });
+      }
     }
   };
 

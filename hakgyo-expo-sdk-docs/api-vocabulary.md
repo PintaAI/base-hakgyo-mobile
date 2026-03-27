@@ -35,13 +35,6 @@ The [`vocabularyApi`](packages/hakgyo-expo-sdk/src/api/vocabulary.ts:6) object p
 
 Retrieves a paginated list of vocabulary sets with optional filtering.
 
-By default, this method automatically filters results based on the authenticated user's session:
-- **Own Sets**: Vocabulary sets created by the user (including drafts).
-- **Class Sets**: Sets attached to classes the user has joined (must be published).
-- **Public Sets**: Sets marked as public by other users (must be published).
-
-You can use `userId` or `kelasId` parameters to explicitly filter, but access rights are still respected.
-
 ```typescript
 const response = await vocabularyApi.listSets({
   page: 1,
@@ -56,7 +49,7 @@ const response = await vocabularyApi.listSets({
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `params` | [`QueryParams`](#queryparams) & `{ userId?: string; kelasId?: string; isPublic?: string }` | Optional query parameters for filtering, pagination, and sorting. Supports `userId` to filter by creator and `kelasId` to filter by associated class. |
+| `params` | [`QueryParams`](#queryparams) | Optional query parameters for filtering, pagination, and sorting |
 
 **Returns:** `Promise<ApiResponse<VocabularySet[], PaginatedMeta>>`
 
@@ -64,10 +57,22 @@ const response = await vocabularyApi.listSets({
 
 #### `getSet(id)`
 
-Retrieves a single vocabulary set by its ID.
+Retrieves a single vocabulary set by its ID. **Session-aware**: Returns `isLearned` status on each item for authenticated users.
 
 ```typescript
 const response = await vocabularyApi.getSet(1);
+
+if (response.success && response.data) {
+  const set = response.data;
+  console.log(`Set: ${set.title}`);
+  console.log(`Total items: ${set.itemCount}`);
+  console.log(`Learned items: ${set.learnedCount}`);
+  
+  // Each item includes isLearned status (session-aware)
+  set.items?.forEach(item => {
+    console.log(`${item.korean}: ${item.isLearned ? '✓ Learned' : '○ Not learned'}`);
+  });
+}
 ```
 
 **Parameters:**
@@ -77,6 +82,14 @@ const response = await vocabularyApi.getSet(1);
 | `id` | `number` | The unique identifier of the vocabulary set |
 
 **Returns:** `Promise<ApiResponse<VocabularySet>>`
+
+**Session-Aware Fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `items[].isLearned` | `boolean` | Whether the current user has learned this item (always `false` for unauthenticated users) |
+| `learnedCount` | `number` | Count of items the current user has learned |
+| `itemCount` | `number` | Total number of items in the set |
 
 ---
 
