@@ -1,3 +1,4 @@
+export { ActiveTryoutBanner } from './active-tryout-banner';
 export { DailySoal } from './daily-soal';
 export { DailyVocab } from './daily-vocab';
 export { HtmlRenderer } from './html-renderer';

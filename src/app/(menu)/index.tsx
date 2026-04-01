@@ -1,5 +1,6 @@
-import { Background, DailySoal, DailyVocab, MenuHeader, UserStats } from '@/components';
+import { ActiveTryoutBanner, Background, DailySoal, DailyVocab, MenuHeader, UserStats } from '@/components';
 import { useKelas } from '@/contexts/kelas-context';
+import { useActiveTryouts } from '@/hooks/use-active-tryouts';
 import { useDailyLogin } from '@/hooks/use-daily-login';
 import { router } from 'expo-router';
 import { useAuth } from 'hakgyo-expo-sdk';
@@ -10,6 +11,7 @@ export default function MenuScreen() {
   const { user, refreshSession } = useAuth();
   const { isLoading, result } = useDailyLogin();
   const { joinedKelas, selectedKelas, setSelectedKelas, isLoading: kelasLoading } = useKelas();
+  const { activeTryouts, loading: tryoutsLoading } = useActiveTryouts();
   const hasRefreshedRef = useRef(false);
 
   // Refresh user stats after daily login completes successfully
@@ -88,6 +90,7 @@ export default function MenuScreen() {
               xp={user.xp ?? 0}
             />
           )}
+          <ActiveTryoutBanner tryouts={activeTryouts} />
           <DailyVocab />
           <DailySoal />
 
