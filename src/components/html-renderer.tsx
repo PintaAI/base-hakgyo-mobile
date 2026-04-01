@@ -354,6 +354,54 @@ function renderElement(element: HtmlElement, key: string): React.ReactNode {
       );
     }
 
+    case 'h1': {
+      return (
+        <Text key={key} className="text-2xl font-bold text-foreground mt-2 mb-1">
+          {children?.map((child, i) => renderElement(child, `${key}-h1-${i}`))}
+        </Text>
+      );
+    }
+
+    case 'h2': {
+      return (
+        <Text key={key} className="text-xl font-bold text-foreground mt-2 mb-1">
+          {children?.map((child, i) => renderElement(child, `${key}-h2-${i}`))}
+        </Text>
+      );
+    }
+
+    case 'h3': {
+      return (
+        <Text key={key} className="text-lg font-semibold text-foreground mt-2 mb-1">
+          {children?.map((child, i) => renderElement(child, `${key}-h3-${i}`))}
+        </Text>
+      );
+    }
+
+    case 'h4': {
+      return (
+        <Text key={key} className="text-base font-semibold text-foreground mt-1 mb-0">
+          {children?.map((child, i) => renderElement(child, `${key}-h4-${i}`))}
+        </Text>
+      );
+    }
+
+    case 'h5': {
+      return (
+        <Text key={key} className="text-sm font-semibold text-foreground mt-1 mb-0">
+          {children?.map((child, i) => renderElement(child, `${key}-h5-${i}`))}
+        </Text>
+      );
+    }
+
+    case 'h6': {
+      return (
+        <Text key={key} className="text-xs font-semibold text-foreground mt-1 mb-0">
+          {children?.map((child, i) => renderElement(child, `${key}-h6-${i}`))}
+        </Text>
+      );
+    }
+
     default: {
       // Unknown tag, render children
       return (

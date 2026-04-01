@@ -86,23 +86,56 @@ export default function VocabDetailScreen() {
 
   const toggleLearned = async (itemId: number) => {
     const currentStatus = learnedStatus[itemId] || false;
+    const newStatus = !currentStatus;
+
+    // Optimistic UI update - immediately update the UI
+    setLearnedStatus(prev => ({
+      ...prev,
+      [itemId]: newStatus,
+    }));
+    
+    // Update vocabSet learned count optimistically
+    if (vocabSet) {
+      const newLearnedCount = newStatus
+        ? (vocabSet.learnedCount || 0) + 1
+        : Math.max(0, (vocabSet.learnedCount || 0) - 1);
+      setVocabSet({ ...vocabSet, learnedCount: newLearnedCount });
+    }
+
     try {
       setTogglingLearned(itemId);
-      const response = await vocabularyApi.setLearnedStatus(itemId, !currentStatus);
+      const response = await vocabularyApi.setLearnedStatus(itemId, newStatus);
+      
+      // Sync with server response
       if (response.data && response.data.isLearned !== undefined) {
         setLearnedStatus(prev => ({
           ...prev,
           [itemId]: response.data!.isLearned,
         }));
-        // Update vocabSet learned count
-        if (vocabSet) {
-          const newLearnedCount = !currentStatus
+        
+        // Update vocabSet learned count based on actual server response
+        if (vocabSet && response.data!.isLearned !== newStatus) {
+          const actualLearnedCount = response.data!.isLearned
             ? (vocabSet.learnedCount || 0) + 1
             : Math.max(0, (vocabSet.learnedCount || 0) - 1);
-          setVocabSet({ ...vocabSet, learnedCount: newLearnedCount });
+          setVocabSet({ ...vocabSet, learnedCount: actualLearnedCount });
         }
       }
     } catch (err) {
+      // Revert optimistic update on error
+      setLearnedStatus(prev => ({
+        ...prev,
+        [itemId]: currentStatus,
+      }));
+      
+      // Revert vocabSet learned count
+      if (vocabSet) {
+        const revertedLearnedCount = currentStatus
+          ? (vocabSet.learnedCount || 0) + 1
+          : Math.max(0, (vocabSet.learnedCount || 0) - 1);
+        setVocabSet({ ...vocabSet, learnedCount: revertedLearnedCount });
+      }
+      
       console.error('Error toggling learned status:', err);
       setError(err instanceof Error ? err.message : 'Failed to update learned status');
     } finally {
@@ -144,18 +177,39 @@ export default function VocabDetailScreen() {
           <View className="flex-row items-start justify-between">
             <View className="flex-1">
               <Text className="text-foreground text-2xl font-bold">{vocabSet.title}</Text>
-              {vocabSet.description && (
-                <Text className="mt-1 text-muted-foreground">{vocabSet.description}</Text>
-              )}
             </View>
             <Text className="text-sm text-muted-foreground ml-2">
               {vocabSet.itemCount ?? vocabItems.length} words
             </Text>
           </View>
-          {vocabSet.learnedCount !== undefined && vocabSet.itemCount !== undefined && (
-            <Text className="text-sm text-primary mt-3">
-              {vocabSet.learnedCount}/{vocabSet.itemCount} learned
+          {(vocabSet.learnedCount === 0 || !vocabSet.learnedCount) ? (
+            <Text className="text-sm text-muted-foreground mt-2">
+              Ceklis kosa kata yang sudah hafal
             </Text>
+          ) : (
+            vocabSet.description && (
+              <Text className="text-sm text-muted-foreground mt-2">
+                {vocabSet.description}
+              </Text>
+            )
+          )}
+          {vocabSet.learnedCount !== undefined && vocabSet.itemCount !== undefined && vocabSet.itemCount > 0 && (
+            <View className="mt-2">
+              <View className="flex-row justify-between items-center mb-1">
+                <Text className="text-xs text-muted-foreground">
+                  {vocabSet.learnedCount}/{vocabSet.itemCount} learned
+                </Text>
+                <Text className="text-xs text-primary font-medium">
+                  {Math.round((vocabSet.learnedCount / vocabSet.itemCount) * 100)}%
+                </Text>
+              </View>
+              <View className="h-2 bg-muted rounded-full overflow-hidden">
+                <View
+                  className="h-full bg-primary rounded-full"
+                  style={{ width: `${(vocabSet.learnedCount / vocabSet.itemCount) * 100}%` }}
+                />
+              </View>
+            </View>
           )}
         </View>
 
@@ -234,7 +288,7 @@ export default function VocabDetailScreen() {
                 <Pressable
                   key={item.id}
                   onPress={() => toggleExpand(item.id)}
-                  className={`p-4 rounded-lg border shadow ${isLearned ? 'bg-green-100 dark:bg-green-900/30 border-green-300 dark:border-green-700' : 'bg-card border-border'}`}
+                  className={`p-4 rounded-lg border shadow ${isLearned ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' : 'bg-card border-border'}`}
                 >
                   <View className="flex-row justify-between items-start">
                     <View className="flex-1">
@@ -251,10 +305,10 @@ export default function VocabDetailScreen() {
                         toggleLearned(item.id);
                       }}
                       disabled={isToggling}
-                      className={`px-3 py-1.5 rounded-full ${isLearned ? 'bg-green-500' : 'bg-muted'}`}
+                      className={`w-8 h-8 rounded-full items-center justify-center ${isLearned ? 'bg-green-200 dark:bg-green-800/50' : 'bg-muted border border-border'}`}
                     >
-                      <Text className={`text-xs font-medium ${isLearned ? 'text-white' : 'text-muted-foreground'}`}>
-                        {isToggling ? '...' : isLearned ? '✓ Learned' : 'Mark Learned'}
+                      <Text className={`text-base font-bold ${isLearned ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
+                        {isToggling ? '...' : isLearned ? '✓' : ''}
                       </Text>
                     </Pressable>
                   </View>

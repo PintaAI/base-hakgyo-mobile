@@ -1,8 +1,8 @@
 import { Colors } from '@/constants/theme';
 import { useAuth, vocabularyApi, VocabularyItem } from 'hakgyo-expo-sdk';
-import { AlertCircle, BookOpen } from 'lucide-react-native';
+import { AlertCircle, BookOpen, HelpCircle, Send } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, FlatList, Keyboard, Pressable, Text, TextInput, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, Animated, FlatList, Keyboard, Pressable, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
 
 interface VocabCardProps {
   item: VocabularyItem;
@@ -123,6 +123,7 @@ export function DailyVocab() {
   const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
   const [guess, setGuess] = useState('');
   const [isWrong, setIsWrong] = useState(false);
+  const [hintIndex, setHintIndex] = useState(0);
   
   const shakeAnimation = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef<FlatList>(null);
@@ -163,10 +164,11 @@ export function DailyVocab() {
     fetchDailyVocab();
   }, [fetchDailyVocab]);
 
-  // Reset guess when card changes
+  // Reset guess and hint when card changes
   useEffect(() => {
     setGuess('');
     setIsWrong(false);
+    setHintIndex(0);
   }, [currentIndex]);
 
   const handleViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: Array<{ item: VocabularyItem; index: number | null }> }) => {
@@ -207,6 +209,21 @@ export function DailyVocab() {
       flipCard();
     } else {
       shakeCard();
+    }
+  };
+
+  const handleHint = () => {
+    const currentItem = vocabItems[currentIndex];
+    if (!currentItem) return;
+    
+    const answer = currentItem.indonesian.trim();
+    if (hintIndex < answer.length) {
+      // Reveal next letter
+      const newHintIndex = hintIndex + 1;
+      setHintIndex(newHintIndex);
+      // Update guess with revealed letters
+      const revealedPart = answer.substring(0, newHintIndex);
+      setGuess(revealedPart);
     }
   };
 
@@ -346,24 +363,61 @@ export function DailyVocab() {
       {/* Guess Input - Outside FlatList */}
       {currentItem && !isCurrentCardFlipped && (
         <View style={{ paddingHorizontal: 12, paddingBottom: 16 }}>
-          <TextInput
-            style={{
-              backgroundColor: theme.background,
-              borderWidth: 1,
-              borderColor: isWrong ? theme.destructive : theme.border,
-              borderRadius: 8,
-              paddingHorizontal: 12,
-              paddingVertical: 10,
-              fontSize: 14,
-              color: theme.foreground,
-            }}
-            placeholder="Tebak artinya..."
-            placeholderTextColor={theme.mutedForeground}
-            value={guess}
-            onChangeText={setGuess}
-            onSubmitEditing={handleGuess}
-            returnKeyType="done"
-          />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            {/* Hint Button */}
+            <TouchableOpacity
+              onPress={handleHint}
+              disabled={hintIndex >= (currentItem?.indonesian.trim().length || 0)}
+              style={{
+                backgroundColor: hintIndex >= (currentItem?.indonesian.trim().length || 0)
+                  ? theme.muted + '40'
+                  : theme.primary,
+                borderRadius: 8,
+                padding: 6,
+              }}
+            >
+              <HelpCircle
+                size={15}
+                color={hintIndex >= (currentItem?.indonesian.trim().length || 0)
+                  ? theme.mutedForeground
+                  : theme.background
+                }
+              />
+            </TouchableOpacity>
+            
+            {/* Text Input */}
+            <TextInput
+              style={{
+                flex: 1,
+                backgroundColor: theme.background,
+                borderWidth: 1,
+                borderColor: isWrong ? theme.destructive : theme.border,
+                borderRadius: 8,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                fontSize: 14,
+                color: theme.foreground,
+              }}
+              placeholder="Tebak artinya..."
+              placeholderTextColor={theme.mutedForeground}
+              value={guess}
+              onChangeText={setGuess}
+              onSubmitEditing={handleGuess}
+              returnKeyType="done"
+            />
+            
+            {/* Send Button */}
+            <TouchableOpacity
+              onPress={handleGuess}
+              style={{
+                backgroundColor: theme.primary,
+                borderRadius: 8,
+                padding: 6,
+              }}
+            >
+              <Send size={15} color={theme.background} />
+            </TouchableOpacity>
+          </View>
         </View>
       )}
     </View>

@@ -487,22 +487,6 @@ export interface Kelas {
   createdAt: string;
   updatedAt: string;
   isEnrolled?: boolean;
-  materis?: Array<{
-    id: number;
-    title: string;
-    order: number;
-    isDemo: boolean;
-  }>;
-  members?: Array<{
-    id: string;
-    name: string;
-    image?: string | null;
-  }>;
-  _count?: {
-    materis: number;
-    members: number;
-    completions: number;
-  };
 }
 ```
 
@@ -548,13 +532,186 @@ export interface Materi {
   kelas?: Kelas;
   createdAt: string;
   updatedAt: string;
-  _count?: {
-    completions: number;
-  };
+  // Optional: included when fetching single materi with relations
+  koleksiSoal?: { id: number };
+  completions?: UserMateriCompletion[];
+  assessments?: UserMateriAssessment[];
 }
 ```
 
 Represents learning material within a class.
+
+### UserMateriCompletion
+
+```typescript
+export interface UserMateriCompletion {
+  id: number;
+  userId: string;
+  materiId: number;
+  isCompleted: boolean;
+  assessmentPassed: boolean;
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    id: string;
+    name: string;
+    image?: string;
+  };
+}
+```
+
+Tracks individual materi completion status for a user.
+
+### UserMateriAssessment
+
+```typescript
+export interface UserMateriAssessment {
+  id: number;
+  userId: string;
+  materiId: number;
+  score: number;
+  isPassed: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+Tracks assessment results for a materi.
+
+### AssessmentAnswer
+
+```typescript
+export interface AssessmentAnswer {
+  soalId: number;
+  selectedOptionId: number;
+}
+```
+
+An answer submitted by the user for a quiz question.
+
+**Properties:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `soalId` | `number` | The question ID |
+| `selectedOptionId` | `number` | The selected option ID |
+
+### AssessmentOption
+
+```typescript
+export interface AssessmentOption {
+  id: number;
+  opsiText: string;
+}
+```
+
+An option (answer choice) for an assessment question.
+
+### AssessmentQuestion
+
+```typescript
+export interface AssessmentQuestion {
+  id: number;
+  pertanyaan: string;
+  opsi: AssessmentOption[];
+}
+```
+
+A question in an assessment with its available options.
+
+### MateriAssessmentConfig
+
+```typescript
+export interface MateriAssessmentConfig {
+  id: number;
+  title: string;
+  koleksiSoalId: number;
+  passingScore: number;
+  questions: AssessmentQuestion[];
+  userAssessment?: UserMateriAssessment | null;
+  canRetake: boolean;
+}
+```
+
+Configuration for a materi assessment (quiz). Returned by `materiApi.getAssessmentConfig()`.
+
+**Properties:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `number` | The materi ID |
+| `title` | `string` | The materi title |
+| `koleksiSoalId` | `number` | The question collection ID |
+| `passingScore` | `number` | Required score to pass (e.g., 80) |
+| `questions` | `AssessmentQuestion[]` | Array of questions with options |
+| `userAssessment` | `UserMateriAssessment?` | Previous attempt if exists |
+| `canRetake` | `boolean` | Always true - unlimited retries |
+
+### MateriAssessmentResult
+
+```typescript
+export interface MateriAssessmentResult {
+  score: number;
+  isPassed: boolean;
+  correctAnswers: number;
+  totalQuestions: number;
+  passingScore: number;
+  nextMateriUnlocked: number | null;
+  assessment: UserMateriAssessment;
+  gamification?: {
+    assessment?: { event: string; baseXP: number; streakBonus: number; totalXP: number; };
+    perfectScore?: { event: string; baseXP: number; streakBonus: number; totalXP: number; };
+  };
+}
+```
+
+Result of submitting an assessment. Returned by `materiApi.submitAssessment()`.
+
+**Properties:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `score` | `number` | User's score (0-100) |
+| `isPassed` | `boolean` | Whether score >= passingScore |
+| `correctAnswers` | `number` | Number of correct answers |
+| `totalQuestions` | `number` | Total questions in assessment |
+| `passingScore` | `number` | Required passing score |
+| `nextMateriUnlocked` | `number?` | ID of next materi if unlocked |
+| `assessment` | `UserMateriAssessment` | Saved assessment record |
+| `gamification` | `object?` | XP rewards for assessment/perfect score |
+
+### MateriCompletionResponse
+
+```typescript
+export interface MateriCompletionResponse {
+  completion: UserMateriCompletion;
+  materiId: number;
+  materiTitle: string;
+  nextMateri?: { id: number; title: string; order: number; } | null;
+  alreadyCompleted?: boolean;
+  message?: string;
+  gamification?: {
+    event: string;
+    baseXP: number;
+    streakBonus: number;
+    totalXP: number;
+    previousLevel: number;
+    newLevel: number;
+    levelsGained: number;
+    levelProgress: LevelProgress;
+  };
+}
+```
+
+Response from marking a materi as complete. Returned by `materiApi.complete()`.
+
+**Properties:**
+| Property | Type | Description |
+|----------|------|-------------|
+| `completion` | `UserMateriCompletion` | The completion record |
+| `materiId` | `number` | The materi ID |
+| `materiTitle` | `string` | The materi title |
+| `nextMateri` | `object?` | Next materi info if unlocked |
+| `alreadyCompleted` | `boolean?` | True if already marked complete |
+| `message` | `string?` | Optional message |
+| `gamification` | `object?` | XP rewards and level progress |
 
 ### VocabularySet
 
@@ -591,10 +748,18 @@ export interface VocabularySet {
       image?: string;
     };
   };
+  // Included when fetching single set with items
+  items?: VocabularyItem[];
 }
 ```
 
 A collection of vocabulary items.
+
+**Session-Aware Fields:**
+| Field | Type | Description |
+|-------|------|-------------|
+| `learnedCount` | `number?` | Count of items the current user has learned (requires authentication) |
+| `items` | `VocabularyItem[]?` | Items in the set, each with `isLearned` status for the current user |
 
 ### VocabularyItem
 
@@ -612,6 +777,8 @@ export interface VocabularyItem {
   collectionId?: number;
   createdAt: string;
   updatedAt: string;
+  // Session-aware: indicates if current user has learned this item
+  isLearned?: boolean;
   creator?: {
     id: string;
     name: string;
@@ -651,6 +818,7 @@ A single vocabulary item with Korean-Indonesian translations.
 | `exampleSentences` | `string[]` | Example sentences |
 | `order` | `number` | Display order |
 | `creatorId` | `string` | Creator's user ID |
+| `isLearned` | `boolean?` | **Session-aware**: Whether the current user has learned this item |
 | `collection` | `object?` | Collection details with optional `kelasVocabularySets` for class associations |
 
 ### VocabularyItemProgress
@@ -738,21 +906,10 @@ Attachment for a question (image, audio, etc.).
 ```typescript
 export interface KoleksiSoal {
   id: number;
-  nama: string;
-  deskripsi?: string;
-  isPrivate?: boolean;
-  isDraft?: boolean;
-  userId?: string;
+  title: string;
+  description?: string;
   createdAt: string;
   updatedAt: string;
-  user?: {
-    id: string;
-    name: string;
-    image?: string | null;
-  };
-  _count?: {
-    soals: number;
-  };
 }
 ```
 
@@ -784,7 +941,6 @@ export interface Tryout {
   koleksiSoalId: number;
   isActive: boolean;
   guruId: string;
-  kelasId?: number;
   createdAt: string;
   updatedAt: string;
   guru?: {
@@ -792,17 +948,10 @@ export interface Tryout {
     name: string;
     image?: string;
   };
-  kelas?: {
-    id: number;
-    title: string;
-  };
   koleksiSoal?: {
     id: number;
     nama: string;
     soals: Soares[];
-  };
-  _count?: {
-    participants: number;
   };
 }
 ```
@@ -893,10 +1042,6 @@ export interface Post {
   author?: User;
   kelasId?: number;
   userLiked?: boolean;
-  _count?: {
-    comments: number;
-    likes: number;
-  };
 }
 ```
 
@@ -928,24 +1073,6 @@ A post in the community feed.
 export interface Comment {
   id: number;
   content: string;
-  htmlContent?: string;
-  postId: number;
-  authorId: string;
-  parentId?: number | null;
-  createdAt: string;
-  updatedAt: string;
-  replyCount?: number;
-  likeCount?: number;
-  author?: {
-    id: string;
-    name: string;
-    image?: string;
-  };
-  replies?: Comment[];
-  _count?: {
-    likes: number;
-    replies: number;
-  };
 }
 ```
 
@@ -1172,7 +1299,7 @@ function processGameEvent(result: GamificationResult): void {
   }
   
   if (streakInfo) {
-    console.log(`🔥 ${streakInfo.currentStreak} Login streak`);
+    console.log(`🔥 ${streakInfo.currentStreak} day streak`);
   }
 }
 

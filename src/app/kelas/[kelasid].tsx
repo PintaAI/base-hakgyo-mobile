@@ -32,6 +32,7 @@ export default function KelasDetailScreen() {
   const [kelas, setKelas] = useState<Kelas | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showMateri, setShowMateri] = useState(false);
 
   useEffect(() => {
     if (kelasId) {
@@ -44,6 +45,7 @@ export default function KelasDetailScreen() {
       setLoading(true);
       setError(null);
       const response = await kelasApi.get(kelasId);
+      console.log('API Response:', JSON.stringify(response, null, 2));
       setKelas(response.data || null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load class');
@@ -93,6 +95,10 @@ export default function KelasDetailScreen() {
     router.push('/(menu)/vocab');
   };
 
+  const toggleShowMateri = () => {
+    setShowMateri(prev => !prev);
+  };
+
   return (
     <ScrollView className="flex-1" contentInsetAdjustmentBehavior="automatic">
         {/* Header Card - Combined with Stats, Author, and Members */}
@@ -112,60 +118,118 @@ export default function KelasDetailScreen() {
                 <FontAwesome name={typeIcon as any} size={9} color="#fff" />
                 <Text className="text-[10px] text-white font-medium">{kelas.type}</Text>
               </View>
-              {/* Stats - Bottom Right Overlay */}
-              {kelas._count && (
-                <View className="absolute bottom-2 right-2 flex-row items-center gap-2 bg-black/60 rounded-full px-2 py-1">
-                  <View className="flex-row items-center gap-0.5">
-                    <FontAwesome name="book" size={9} color="#fff" />
-                    <Text className="text-[10px] text-white font-medium">{kelas._count.materis}</Text>
+              {/* Members Preview - Bottom Left Overlay */}
+              {kelas.members && kelas.members.length > 0 && (
+                <View className="absolute bottom-2 left-2">
+                  <View className="flex-row items-center">
+                    {kelas.members.slice(0, 3).map((member, index) => (
+                      <View
+                        key={member.id}
+                        className="w-5 h-5 rounded-full bg-white/90 items-center justify-center border border-white"
+                        style={{ marginLeft: index > 0 ? -6 : 0 }}
+                      >
+                        <Text className="text-[7px] font-semibold text-primary">
+                          {(member.name || 'U')[0].toUpperCase()}
+                        </Text>
+                      </View>
+                    ))}
+                    {kelas.members.length > 2 && (
+                      <View
+                        className="w-5 h-5 rounded-full bg-primary items-center justify-center border border-white"
+                        style={{ marginLeft: -6 }}
+                      >
+                        <Text className="text-[7px] font-semibold text-primary-foreground">+{kelas.members.length - 2}</Text>
+                      </View>
+                    )}
                   </View>
-                  <View className="flex-row items-center gap-0.5">
-                    <FontAwesome name="users" size={9} color="#fff" />
-                    <Text className="text-[10px] text-white font-medium">{kelas._count.members}</Text>
-                  </View>
-                  <View className="flex-row items-center gap-0.5">
-                    <FontAwesome name="trophy" size={9} color="#fff" />
-                    <Text className="text-[10px] text-white font-medium">{kelas._count.completions}</Text>
-                  </View>
+                  <Text className="text-[8px] text-white font-medium mt-1 bg-black/50 px-1 rounded">
+                    {kelas.members.slice(0, 2).map(m => m.name || 'Unknown').join(', ')}
+                    {kelas.members.length > 2 && ` +${kelas.members.length - 2}`}
+                  </Text>
                 </View>
               )}
             </View>
 
-            {/* Title & Badges */}
-            <View className="p-4 pb-0">
-              <View className="flex-row items-start justify-between">
-                <View className="flex-1">
-                  <Text className="text-foreground text-xl font-bold" numberOfLines={2}>
-                    {kelas.title}
+            {/* Stats & Progress Bar - Below Thumbnail */}
+            {kelas._count && (
+              <View className="px-4 pt-3 bg-card">
+                {/* Stats Row */}
+                <View className="flex-row items-center justify-between mb-2">
+                  <View className="flex-row items-center gap-3">
+                    <View className="flex-row items-center gap-1">
+                      <FontAwesome name="book" size={12} color="#6b7280" />
+                      <Text className="text-xs text-muted-foreground">{kelas._count.materis} materials</Text>
+                    </View>
+                    <View className="flex-row items-center gap-1">
+                      <FontAwesome name="users" size={12} color="#6b7280" />
+                      <Text className="text-xs text-muted-foreground">{kelas._count.members} members</Text>
+                    </View>
+                  </View>
+                  <View className="flex-row items-center gap-1">
+                    <FontAwesome name="trophy" size={12} color="#f59e0b" />
+                    <Text className="text-xs font-semibold text-foreground">{kelas._count.completions} completed</Text>
+                  </View>
+                </View>
+                {/* Progress Bar */}
+                <View className="flex-row items-center gap-2">
+                  <View className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                    <View
+                      className="h-full bg-primary rounded-full"
+                      style={{
+                        width: `${kelas._count.materis > 0
+                          ? Math.min((kelas._count.completions / kelas._count.materis) * 100, 100)
+                          : 0}%`
+                      }}
+                    />
+                  </View>
+                  <Text className="text-xs font-semibold text-primary">
+                    {kelas._count.materis > 0
+                      ? Math.round((kelas._count.completions / kelas._count.materis) * 100)
+                      : 0}%
                   </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Title & Badges - Merged */}
+            <View className="p-4">
+              <View className="flex-row items-start justify-between">
+                <View className="flex-1 mr-2">
+                  <View className="flex-row items-center gap-2 flex-wrap">
+                    <Text className="text-foreground text-lg font-bold shrink-0" numberOfLines={1}>
+                      {kelas.title}
+                    </Text>
+                    {/* Level Badge */}
+                    <View className="flex-row items-center gap-1 px-2 py-0.5 rounded" style={{ backgroundColor: levelColor + '1a' }}>
+                      <FontAwesome name="signal" size={8} color={levelColor} />
+                      <Text className="text-[10px] font-semibold" style={{ color: levelColor }}>{kelas.level}</Text>
+                    </View>
+                    {/* Enrolled Badge */}
+                    {kelas.isEnrolled && (
+                      <View className="flex-row items-center gap-1 bg-success-muted px-2 py-0.5 rounded">
+                        <FontAwesome name="check-circle" size={8} color="#16a34a" />
+                        <Text className="text-[10px] font-semibold text-success">Enrolled</Text>
+                      </View>
+                    )}
+                  </View>
                   {kelas.author && (
-                    <Text className="text-xs text-muted-foreground mt-1">by {kelas.author.name || 'Unknown'}</Text>
+                    <Text className="text-xs text-muted-foreground">by {kelas.author.name || 'Unknown'}</Text>
                   )}
                 </View>
                 {kelas.isPaidClass && (
-                  <View className="bg-info-muted px-2 py-1 rounded ml-2">
+                  <View className="bg-info-muted px-2 py-1 rounded">
                     <Text className="text-xs font-semibold text-info">Premium</Text>
                   </View>
                 )}
               </View>
 
-              {/* Badges Row */}
-              <View className="flex-row items-center gap-2 mt-3 flex-wrap">
-                <View className="flex-row items-center gap-1 px-2 py-1 rounded" style={{ backgroundColor: levelColor + '1a' }}>
-                  <FontAwesome name="signal" size={10} color={levelColor} />
-                  <Text className="text-xs font-semibold" style={{ color: levelColor }}>{kelas.level}</Text>
-                </View>
-                {kelas.isEnrolled && (
-                  <View className="flex-row items-center gap-1 bg-success-muted px-2 py-1 rounded">
-                    <FontAwesome name="check-circle" size={10} color="#16a34a" />
-                    <Text className="text-xs font-semibold text-success">Enrolled</Text>
-                  </View>
-                )}
-              </View>
-
               {/* Description */}
-              {kelas.htmlDescription && (
-                <HtmlRenderer html={kelas.htmlDescription} />
+              {kelas.description && (
+                <View className="mt-3">
+                  <Text className="text-sm text-foreground leading-relaxed">
+                    {kelas.description}
+                  </Text>
+                </View>
               )}
 
               {/* Price */}
@@ -176,62 +240,42 @@ export default function KelasDetailScreen() {
                 </View>
               )}
             </View>
+          </View>
+        </View>
 
-            {/* Members Preview - Minimal */}
-            {kelas.members && kelas.members.length > 0 && (
-              <View className="px-4 pb-4">
-                <View className="flex-row items-center">
-                  {kelas.members.slice(0, 6).map((member, index) => (
-                    <View
-                      key={member.id}
-                      className="w-7 h-7 rounded-full bg-primary/20 items-center justify-center border-2 border-card"
-                      style={{ marginLeft: index > 0 ? -6 : 0 }}
-                    >
-                      <Text className="text-[10px] font-semibold text-primary">
-                        {(member.name || 'U')[0].toUpperCase()}
-                      </Text>
-                    </View>
-                  ))}
-                  {kelas.members.length > 6 && (
-                    <View
-                      className="w-7 h-7 rounded-full bg-primary items-center justify-center border-2 border-card"
-                      style={{ marginLeft: -6 }}
-                    >
-                      <Text className="text-[10px] font-semibold text-primary-foreground">+{kelas.members.length - 6}</Text>
-                    </View>
-                  )}
-                </View>
-                <Text className="text-[10px] text-muted-foreground mt-2">
-                  {kelas.members.slice(0, 2).map(m => m.name || 'Unknown').join(', ')}
-                  {kelas.members.length > 2 && ` & ${kelas.members.length - 2} more`}
+        {/* Soal, Vocab & Materi Toggle Buttons */}
+        <View className="px-4 py-2">
+          <View className="flex-row gap-2">
+            <Pressable
+              onPress={handleNavigateToSoal}
+              className="flex-1 flex-row items-center justify-center gap-1 bg-primary rounded-xl py-3 active:opacity-80"
+            >
+              <FontAwesome name="pencil-square" size={14} color={theme.primaryForeground} />
+              <Text className="text-primary-foreground text-sm font-semibold">Soal</Text>
+            </Pressable>
+            <Pressable
+              onPress={handleNavigateToVocab}
+              className="flex-1 flex-row items-center justify-center gap-1 bg-primary rounded-xl py-3 active:opacity-80"
+            >
+              <FontAwesome name="book" size={14} color={theme.primaryForeground} />
+              <Text className="text-primary-foreground text-sm font-semibold">Kosa-kata</Text>
+            </Pressable>
+            {kelas.materis && kelas.materis.length > 0 && (
+              <Pressable
+                onPress={toggleShowMateri}
+                className={`flex-1 flex-row items-center justify-center gap-1 rounded-xl py-3 active:opacity-80 ${showMateri ? 'bg-secondary' : 'bg-primary'}`}
+              >
+                <FontAwesome name={showMateri ? 'chevron-up' : 'list'} size={14} color={showMateri ? theme.secondaryForeground : theme.primaryForeground} />
+                <Text className={`text-sm font-semibold ${showMateri ? 'text-secondary-foreground' : 'text-primary-foreground'}`}>
+                  {showMateri ? 'Tutup' : 'Materi'}
                 </Text>
-              </View>
+              </Pressable>
             )}
           </View>
         </View>
 
-        {/* Soal & Vocab Buttons */}
-        <View className="px-4 py-2">
-          <View className="flex-row gap-3">
-            <Pressable
-              onPress={handleNavigateToSoal}
-              className="flex-1 flex-row items-center justify-center gap-2 bg-primary rounded-xl py-3 active:opacity-80"
-            >
-              <FontAwesome name="pencil-square" size={16} color={theme.primaryForeground} />
-              <Text className="text-primary-foreground font-semibold">Bank Soal</Text>
-            </Pressable>
-            <Pressable
-              onPress={handleNavigateToVocab}
-              className="flex-1 flex-row items-center justify-center gap-2 bg-secondary rounded-xl py-3 active:opacity-80"
-            >
-              <FontAwesome name="book" size={16} color={theme.secondaryForeground} />
-              <Text className="text-secondary-foreground font-semibold">Kosakata</Text>
-            </Pressable>
-          </View>
-        </View>
-
         {/* Materials */}
-        {kelas.materis && kelas.materis.length > 0 && (
+        {showMateri && kelas.materis && kelas.materis.length > 0 && (
           <View className="px-4 py-2">
             <Text className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
               Materials ({kelas.materis.length})
@@ -240,15 +284,27 @@ export default function KelasDetailScreen() {
               {kelas.materis.map((materi, index) => (
                 <Pressable
                   key={materi.id}
-                  onPress={() => router.push(`/kelas/${kelasId}/${materi.id}`)}
-                  className={`flex-row items-center gap-3 p-3 active:bg-muted/50 ${index < kelas.materis!.length - 1 ? 'border-b border-border' : ''}`}
+                  onPress={() => {
+                    if (materi.isAccessible || materi.isDemo) {
+                      router.push(`/kelas/${kelasId}/${materi.id}`);
+                    }
+                  }}
+                  className={`flex-row items-center gap-3 p-3 ${materi.isAccessible || materi.isDemo ? 'active:bg-muted/50' : 'opacity-60'} ${index < kelas.materis!.length - 1 ? 'border-b border-border' : ''}`}
                 >
-                  <View className={`w-8 h-8 rounded-lg items-center justify-center ${materi.isDemo ? 'bg-info-muted' : 'bg-muted'}`}>
-                    <FontAwesome name={materi.isDemo ? 'play' : 'lock'} size={12} color={materi.isDemo ? '#2563eb' : '#6b7280'} />
+                  <View className={`w-8 h-8 rounded-lg items-center justify-center ${materi.isCompleted ? 'bg-success-muted' : materi.isAccessible ? 'bg-info-muted' : 'bg-muted'}`}>
+                    <FontAwesome
+                      name={materi.isCompleted ? 'check-circle' : materi.isAccessible ? 'play' : 'lock'}
+                      size={12}
+                      color={materi.isCompleted ? '#16a34a' : materi.isAccessible ? '#2563eb' : '#6b7280'}
+                    />
                   </View>
                   <View className="flex-1">
                     <Text className="text-foreground text-sm font-medium" numberOfLines={1}>{materi.title}</Text>
-                    <Text className="text-xs text-muted-foreground">Order: {materi.order}</Text>
+                    {materi.description && (
+                      <Text className="text-xs text-muted-foreground" numberOfLines={1}>
+                        {materi.description}
+                      </Text>
+                    )}
                   </View>
                   {materi.isDemo && (
                     <View className="bg-info-muted px-2 py-0.5 rounded">
@@ -259,6 +315,13 @@ export default function KelasDetailScreen() {
                 </Pressable>
               ))}
             </View>
+          </View>
+        )}
+
+        {/* Description */}
+        {kelas.htmlDescription && (
+          <View className="px-4 py-2">
+            <HtmlRenderer html={kelas.htmlDescription} />
           </View>
         )}
       </ScrollView>

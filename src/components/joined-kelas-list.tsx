@@ -23,43 +23,43 @@ export function JoinedKelasList({ joinedKelas, isLoading, error }: JoinedKelasLi
 
   if (isLoading) {
     return (
-      <View style={{ backgroundColor: theme.card, borderRadius: 12, borderWidth: 1, borderColor: theme.border, padding: 24, alignItems: 'center' }}>
+      <View className="bg-card rounded-xl border border-border p-6 items-center">
         <ActivityIndicator size="small" color={theme.primary} />
-        <Text style={{ marginTop: 8, color: theme.mutedForeground }}>Loading classes...</Text>
+        <Text className="mt-2 text-muted-foreground">Loading classes...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={{ backgroundColor: theme.card, borderRadius: 12, borderWidth: 1, borderColor: theme.border, padding: 16 }}>
-        <Text style={{ color: theme.destructive }}>{error}</Text>
+      <View className="bg-card rounded-xl border border-border p-4">
+        <Text className="text-destructive">{error}</Text>
       </View>
     );
   }
 
   if (joinedKelas.length === 0) {
     return (
-      <View style={{ backgroundColor: theme.card, borderRadius: 12, borderWidth: 1, borderColor: theme.border, padding: 24, alignItems: 'center' }}>
+      <View className="bg-card rounded-xl border border-border p-6 items-center">
         <FontAwesome name="graduation-cap" size={32} color={theme.mutedForeground} />
-        <Text style={{ marginTop: 12, color: theme.mutedForeground, textAlign: 'center' }}>No classes joined yet</Text>
+        <Text className="mt-3 text-muted-foreground text-center">No classes joined yet</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ backgroundColor: theme.card, borderRadius: 12, borderWidth: 1, borderColor: theme.border, overflow: 'hidden' }}>
-      <View style={{ paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: theme.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+    <View className="bg-card rounded-xl border border-border overflow-hidden">
+      <View className="px-4 py-3 border-b border-border flex-row items-center justify-between">
+        <View className="flex-row items-center gap-2">
           <FontAwesome name="graduation-cap" size={18} color={theme.primary} />
-          <Text style={{ fontWeight: '600', fontSize: 16, color: theme.foreground }}>Kelas ku</Text>
+          <Text className="font-semibold text-base text-foreground">Kelas ku</Text>
         </View>
-        <View style={{ backgroundColor: theme.primary + '1A', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999 }}>
-          <Text style={{ fontSize: 12, fontWeight: '600', color: theme.primary }}>{joinedKelas.length}</Text>
+        <View className="bg-primary/10 px-2 py-1 rounded-full">
+          <Text className="text-xs font-semibold text-primary">{joinedKelas.length}</Text>
         </View>
       </View>
 
-      <View style={{ padding: 12, gap: 8 }}>
+      <View className="p-3 gap-2">
         {joinedKelas.map((kelas) => {
           const levelColor = KELAS_LEVEL_COLORS[kelas.level] || theme.mutedForeground;
 
@@ -72,26 +72,31 @@ export function JoinedKelasList({ joinedKelas, isLoading, error }: JoinedKelasLi
             <Pressable
               key={kelas.id}
               onPress={handlePress}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 10, backgroundColor: theme.background }}
+              className="flex-row items-center gap-3 p-1 shadow-sm pr-4 rounded-lg bg-card border border-border active:opacity-80"
             >
               {kelas.thumbnail ? (
-                <Image source={{ uri: kelas.thumbnail }} style={{ width: 44, height: 44, borderRadius: 8 }} resizeMode="cover" />
+                <Image source={{ uri: kelas.thumbnail }} className="w-11 h-11 rounded-lg" resizeMode="cover" />
               ) : (
-                <View style={{ width: 44, height: 44, borderRadius: 8, backgroundColor: theme.muted, alignItems: 'center', justifyContent: 'center' }}>
+                <View className="w-11 h-11 rounded-lg bg-muted items-center justify-center">
                   <FontAwesome name="book" size={20} color={theme.foreground} />
                 </View>
               )}
 
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text style={{ fontWeight: '600', fontSize: 16, color: theme.foreground }} numberOfLines={1}>
+              <View className="flex-1 gap-1">
+                <Text className="font-semibold text-base text-foreground" numberOfLines={1}>
                   {kelas.title}
                 </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <View style={{ backgroundColor: levelColor + '1A', paddingHorizontal: 6, paddingVertical: 1, borderRadius: 4 }}>
-                    <Text style={{ fontSize: 10, fontWeight: '500', color: levelColor }}>{kelas.level}</Text>
+                <View className="flex-row items-center gap-2">
+                  <View
+                    className="px-1.5 py-0.5 rounded"
+                    style={{ backgroundColor: levelColor + '1A' }}
+                  >
+                    <Text className="text-[10px] font-medium" style={{ color: levelColor }}>
+                      {kelas.level}
+                    </Text>
                   </View>
                   {kelas._count?.members !== undefined && (
-                    <Text style={{ fontSize: 10, color: theme.mutedForeground }}>{kelas._count.members} members</Text>
+                    <Text className="text-[10px] text-muted-foreground">{kelas._count.members} members</Text>
                   )}
                 </View>
               </View>

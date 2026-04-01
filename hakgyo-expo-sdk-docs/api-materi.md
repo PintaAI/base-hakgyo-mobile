@@ -208,9 +208,10 @@ interface Materi {
   kelas?: Kelas;
   createdAt: string;
   updatedAt: string;
-  _count?: {
-    completions: number;
-  };
+  // Optional: included when fetching single materi with relations
+  koleksiSoal?: { id: number };
+  completions?: UserMateriCompletion[];
+  assessments?: UserMateriAssessment[];
 }
 ```
 
@@ -230,6 +231,9 @@ interface Materi {
 | `passingScore` | `number?` | Minimum score required to pass (percentage) |
 | `kelasId` | `number` | ID of the parent class |
 | `kelas` | `Kelas?` | Associated class object (included when fetching with relations) |
+| `koleksiSoal` | `{ id: number }?` | Linked question collection (only ID included) |
+| `completions` | `UserMateriCompletion[]?` | Completion records for this material |
+| `assessments` | `UserMateriAssessment[]?` | Assessment results for current user |
 | `createdAt` | `string` | ISO timestamp of creation |
 | `updatedAt` | `string` | ISO timestamp of last update |
 
@@ -596,8 +600,151 @@ function validateAnswers(
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `GET` | `/api/materi/{id}` | Get material by ID |
-| `POST` | `/api/materi/{id}/complete` | Mark material as complete |
+| `POST` | `/api/materi/{id}/complete` | Mark material as complete (no assessment) |
+| `GET` | `/api/materi/{id}/assessment` | Get assessment configuration (questions) |
 | `POST` | `/api/materi/{id}/assessment` | Submit assessment answers |
-| `GET` | `/api/materi/{id}/assessment-config` | Get assessment configuration |
-| `GET` | `/api/materi` | List all materials |
-| `POST` | `/api/materi` | Create new material |
+
+---
+
+## Types Reference
+
+### `AssessmentAnswer`
+
+An answer submitted by the user for a quiz question.
+
+```typescript
+interface AssessmentAnswer {
+  soalId: number;           // The question ID
+  selectedOptionId: number; // The selected option ID
+}
+```
+
+### `AssessmentOption`
+
+An option (answer choice) for an assessment question.
+
+```typescript
+interface AssessmentOption {
+  id: number;
+  opsiText: string;  // The option text displayed to user
+}
+```
+
+### `AssessmentQuestion`
+
+A question in an assessment.
+
+```typescript
+interface AssessmentQuestion {
+  id: number;
+  pertanyaan: string;     // The question text
+  opsi: AssessmentOption[]; // Available options
+}
+```
+
+### `MateriAssessmentConfig`
+
+Configuration for a materi assessment (quiz). Returned by `getAssessmentConfig()`.
+
+```typescript
+interface MateriAssessmentConfig {
+  id: number;
+  title: string;
+  koleksiSoalId: number;
+  passingScore: number;           // Required score to pass (e.g., 80)
+  questions: AssessmentQuestion[];
+  userAssessment?: UserMateriAssessment | null;  // Previous attempt if exists
+  canRetake: boolean;             // Always true - unlimited retries
+}
+```
+
+### `MateriAssessmentResult`
+
+Result of submitting an assessment. Returned by `submitAssessment()`.
+
+```typescript
+interface MateriAssessmentResult {
+  score: number;                  // User's score (0-100)
+  isPassed: boolean;              // Whether score >= passingScore
+  correctAnswers: number;         // Number of correct answers
+  totalQuestions: number;         // Total questions in assessment
+  passingScore: number;           // Required passing score
+  nextMateriUnlocked: number | null;  // ID of next materi if unlocked
+  assessment: UserMateriAssessment;   // Saved assessment record
+  gamification?: {
+    assessment?: {
+      event: string;
+      baseXP: number;
+      streakBonus: number;
+      totalXP: number;
+    };
+    perfectScore?: {
+      event: string;
+      baseXP: number;
+      streakBonus: number;
+      totalXP: number;
+    };
+  };
+}
+```
+
+### `MateriCompletionResponse`
+
+Response from marking a materi as complete. Returned by `complete()`.
+
+```typescript
+interface MateriCompletionResponse {
+  completion: UserMateriCompletion;
+  materiId: number;
+  materiTitle: string;
+  nextMateri?: {
+    id: number;
+    title: string;
+    order: number;
+  } | null;
+  alreadyCompleted?: boolean;     // True if already marked complete
+  message?: string;
+  gamification?: {
+    event: string;
+    baseXP: number;
+    streakBonus: number;
+    totalXP: number;
+    previousLevel: number;
+    newLevel: number;
+    levelsGained: number;
+    levelProgress: LevelProgress;
+  };
+}
+```
+
+### `UserMateriCompletion`
+
+Tracks a user's completion status for a materi.
+
+```typescript
+interface UserMateriCompletion {
+  id: number;
+  userId: string;
+  materiId: number;
+  isCompleted: boolean;       // Content viewed/read
+  assessmentPassed: boolean;  // Quiz passed (if applicable)
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+### `UserMateriAssessment`
+
+Tracks a user's assessment result for a materi.
+
+```typescript
+interface UserMateriAssessment {
+  id: number;
+  userId: string;
+  materiId: number;
+  score: number;              // 0-100
+  isPassed: boolean;          // score >= passingScore
+  createdAt: string;
+  updatedAt: string;
+}
+```

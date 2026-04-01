@@ -3,12 +3,12 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Materi, materiApi } from 'hakgyo-expo-sdk';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Pressable,
-    ScrollView,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
 } from 'react-native';
 
 import { HtmlRenderer } from '@/components/html-renderer';
@@ -38,7 +38,15 @@ export default function MateriDetailScreen() {
       setLoading(true);
       setError(null);
       const response = await materiApi.get(materiId);
-      setMateri(response.data || null);
+      console.log('Materi API Response:', JSON.stringify(response, null, 2));
+      if (response.success && response.data) {
+        setMateri(response.data);
+      } else {
+        setMateri(null);
+        if (response.error) {
+          setError(response.error);
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load material');
       console.error('Error fetching materi:', err);
@@ -53,6 +61,7 @@ export default function MateriDetailScreen() {
     try {
       setCompleting(true);
       const response = await materiApi.complete(materiId);
+      console.log('Complete Materi API Response:', JSON.stringify(response, null, 2));
 
       if (response.success && response.data) {
         const xpEarned = (response.data as any).gamification?.totalXP;
@@ -78,7 +87,7 @@ export default function MateriDetailScreen() {
 
   const handleStartAssessment = () => {
     if (!materi?.koleksiSoalId) return;
-    router.push(`/(menu)/soal/${materi.koleksiSoalId}`);
+    router.push(`/kelas/${kelasId}/${materiId}/assessment`);
   };
 
   if (loading) {
