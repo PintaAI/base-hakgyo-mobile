@@ -1,7 +1,8 @@
 import { useLocalSearchParams } from 'expo-router';
-import { useAuth, vocabularyApi, VocabularyItem, VocabularySet} from 'hakgyo-expo-sdk';
+import { useAuth, vocabularyApi, VocabularyItem, VocabularySet } from 'hakgyo-expo-sdk';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export default function VocabDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -143,9 +144,13 @@ export default function VocabDetailScreen() {
     }
   };
 
+  const sheetStyle = Platform.OS === 'android'
+    ? { borderTopLeftRadius: 16, borderTopRightRadius: 16, overflow: 'hidden' as const }
+    : undefined;
+
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center">
+      <View className="flex-1 bg-background items-center justify-center" style={sheetStyle}>
         <ActivityIndicator size="large" className="text-primary" />
         <Text className="mt-2 text-muted-foreground">Loading vocabulary set...</Text>
       </View>
@@ -154,7 +159,7 @@ export default function VocabDetailScreen() {
 
   if (error || !vocabSet) {
     return (
-      <View className="flex-1 p-6">
+      <View className="flex-1 bg-background p-6" style={sheetStyle}>
         <Text className="text-destructive">{error || 'Vocabulary set not found'}</Text>
         <Pressable
           className="mt-4 p-3 bg-primary rounded-lg"
@@ -171,7 +176,17 @@ export default function VocabDetailScreen() {
       className="flex-1"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <View className="flex-1" collapsable={false}>
+      <View
+        className="flex-1 bg-background"
+        collapsable={false}
+        style={Platform.OS === 'android' ? { borderTopLeftRadius: 16, borderTopRightRadius: 16, overflow: 'hidden' } : undefined}
+      >
+        {/* Custom grabber for Android (sheetGrabberVisible is iOS-only) */}
+        {Platform.OS === 'android' && (
+          <View className="items-center pt-3 pb-1" collapsable={false}>
+            <View className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+          </View>
+        )}
         {/* Header */}
         <View className="p-6 pb-4" collapsable={false}>
           <View className="flex-row items-start justify-between">
@@ -273,6 +288,7 @@ export default function VocabDetailScreen() {
           className="flex-1 px-4"
           contentContainerStyle={{ paddingBottom: 24, gap: 12, paddingTop: 8 }}
           keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled
         >
           {vocabItems.length === 0 ? (
             <Text className="text-muted-foreground text-center mt-8">

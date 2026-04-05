@@ -1,6 +1,5 @@
 import { KelasProvider } from '@/contexts/kelas-context';
 import { useEASUpdate } from '@/hooks/use-eas-update';
-import { usePushNotifications } from '@/hooks/use-notifications';
 import { BASE_URL } from '@/lib/config';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
@@ -42,17 +41,6 @@ GoogleSignin.configure({
   offlineAccess: true,
 });
 
-// Component to handle notification registration
-function NotificationHandler() {
-  // This hook handles:
-  // - Requesting notification permissions
-  // - Getting Expo push token
-  // - Registering token with Hakgyo backend
-  // - Setting up notification listeners
-  usePushNotifications();
-  return null;
-}
-
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   
@@ -69,7 +57,6 @@ export default function RootLayout() {
         />
         <AuthProvider>
           <KelasProvider>
-            <NotificationHandler />
             <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen
               name="auth"

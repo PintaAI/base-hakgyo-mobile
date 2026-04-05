@@ -9,16 +9,20 @@ import { JoinedKelasList } from '@/components/joined-kelas-list';
 import { Background } from '@/components/themed-background';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useKelas } from '@/contexts/kelas-context';
+import { usePushNotifications } from '@/hooks/use-notifications';
 import { useTheme } from '@/hooks/use-theme';
 
 export default function ProfileScreen() {
   const { user, signOut, refreshSession } = useAuth();
   const { joinedKelas, isLoading, error, refreshJoinedKelas } = useKelas();
+  const { unregister } = usePushNotifications();
   const [refreshing, setRefreshing] = useState(false);
   const insets = useSafeAreaInsets();
 
   const handleSignOut = async () => {
     try {
+      // Unregister push notifications before signing out
+      await unregister();
       await signOut();
       router.push('/auth');
     } catch (error) {
