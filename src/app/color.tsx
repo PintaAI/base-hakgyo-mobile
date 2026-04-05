@@ -1,12 +1,12 @@
 import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
-import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/hooks/use-theme';
 
 export default function ColorScreen() {
+  const theme = useTheme();
   const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
 
   const colorEntries = Object.entries(theme);
 

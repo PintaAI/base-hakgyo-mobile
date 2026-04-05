@@ -3,7 +3,7 @@
  * Dynamically sets the base URL based on the environment:
  * - Development (simulator/emulator): http://localhost:3000
  * - Development (real device): Auto-detects development machine IP from Expo
- * - Production: https://hakgyo.vercel.app
+ * - Production: Uses EXPO_PUBLIC_API_URL from .env (defaults to https://hakgyo.vercel.app)
  */
 
 import Constants from 'expo-constants';
@@ -11,6 +11,10 @@ import Constants from 'expo-constants';
 // Detect if we're in development mode
 // In Expo, __DEV__ is true during development builds and false in production
 const isDevelopment = typeof __DEV__ !== 'undefined' && __DEV__;
+
+// Production API URL from environment variable
+// Set EXPO_PUBLIC_API_URL in .env for production builds
+const PRODUCTION_API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://hakgyo.vercel.app';
 
 // Get local host IP for real device testing
 // Set EXPO_PUBLIC_LOCAL_HOST_IP in .env to your machine's IP address (fallback)
@@ -38,7 +42,7 @@ const getDevServerIp = (): string | null => {
 // Base URL configuration
 const getBaseUrl = (): string => {
   if (!isDevelopment) {
-    return 'https://hakgyo.vercel.app';
+    return PRODUCTION_API_URL;
   }
   
   // Try to get the development machine's IP from Expo

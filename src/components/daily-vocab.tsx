@@ -1,8 +1,9 @@
 import { Colors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { useAuth, vocabularyApi, VocabularyItem } from 'hakgyo-expo-sdk';
 import { AlertCircle, BookOpen, HelpCircle, Send } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, FlatList, Keyboard, Pressable, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { Animated, FlatList, Keyboard, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { DailyVocabSkeleton } from './skeletons';
 
 interface VocabCardProps {
@@ -132,9 +133,7 @@ export function DailyVocab() {
     itemVisiblePercentThreshold: 50,
   }).current;
 
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const theme = isDark ? Colors.dark : Colors.light;
+  const theme = useTheme();
 
   const fetchDailyVocab = useCallback(async () => {
     if (!user?.id) {

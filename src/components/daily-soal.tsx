@@ -1,6 +1,6 @@
-import { Colors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { gamificationApi, Soal, soalApi, useAuth } from 'hakgyo-expo-sdk';
-import { AlertCircle, BookOpen, CheckCircle, ChevronRight, XCircle } from 'lucide-react-native';
+import { AlertCircle, BookOpen, ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, SafeAreaView, StatusBar, Text, useColorScheme, View } from 'react-native';
 import { QuizViewer } from './quiz-viewer';
@@ -17,9 +17,9 @@ export function DailySoal() {
   const [xpEarned, setXpEarned] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const theme = useTheme();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const theme = isDark ? Colors.dark : Colors.light;
 
   const fetchDailySoal = useCallback(async () => {
     if (!user?.id) {

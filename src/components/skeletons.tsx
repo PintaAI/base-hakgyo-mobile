@@ -1,13 +1,11 @@
-import { Colors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { BookOpen } from 'lucide-react-native';
 import React from 'react';
-import { Text, useColorScheme, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { Skeleton } from './ui/skeleton';
 
 export function DailyVocabSkeleton() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const theme = isDark ? Colors.dark : Colors.light;
+  const theme = useTheme();
 
   return (
     <View
@@ -72,9 +70,7 @@ export function DailyVocabSkeleton() {
 }
 
 export function DailySoalSkeleton() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const theme = isDark ? Colors.dark : Colors.light;
+  const theme = useTheme();
 
   return (
     <View

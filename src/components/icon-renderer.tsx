@@ -1,6 +1,5 @@
+import { useTheme } from '@/hooks/use-theme';
 import * as LucideIcons from 'lucide-react-native';
-import { useColorScheme } from 'react-native';
-import { Colors } from '@/constants/theme';
 
 export interface IconRendererProps {
   name?: string | null;
@@ -14,8 +13,7 @@ export interface IconRendererProps {
  * Automatically uses theme-appropriate color if not specified.
  */
 export function IconRenderer({ name, size = 24, color, strokeWidth = 2 }: IconRendererProps) {
-  const scheme = useColorScheme();
-  const theme = scheme === 'dark' ? Colors.dark : Colors.light;
+  const theme = useTheme();
   const iconColor = color ?? theme.foreground;
 
   // Strip "Fa" prefix and convert to PascalCase

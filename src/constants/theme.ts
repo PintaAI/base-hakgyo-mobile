@@ -42,6 +42,10 @@ export const Colors = {
     info: '#2563eb',
     infoForeground: '#1d4ed8',
     infoMuted: '#dbeafe',
+    // Warning colors
+    warning: '#d97706',
+    warningForeground: '#92400e',
+    warningMuted: '#fffbeb',
     // Primary colors (neutral)
     primary: '#374151',
     primaryForeground: '#ffffff',
@@ -86,6 +90,10 @@ export const Colors = {
     info: '#60a5fa',
     infoForeground: '#93c5fd',
     infoMuted: '#1e3a5f',
+    // Warning colors
+    warning: '#7e5e0f',
+    warningForeground: '#fcd34d',
+    warningMuted: '#a14d1f',
     // Primary colors (neutral)
     primary: '#d1d5db',
     primaryForeground: '#000000',

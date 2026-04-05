@@ -2,13 +2,13 @@ import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
 import { router } from 'expo-router';
 import { useAuth } from 'hakgyo-expo-sdk';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, Text, View, useColorScheme } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 
 import { JoinedKelasList } from '@/components/joined-kelas-list';
 import { Background } from '@/components/themed-background';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Colors } from '@/constants/theme';
 import { useKelas } from '@/contexts/kelas-context';
+import { useTheme } from '@/hooks/use-theme';
 
 export default function ProfileScreen() {
   const { user, signOut, refreshSession } = useAuth();
@@ -38,9 +38,7 @@ export default function ProfileScreen() {
     }
   }, [refreshSession, refreshJoinedKelas]);
 
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const theme = isDark ? Colors.dark : Colors.light;
+  const theme = useTheme();
 
   // Calculate which days of the week should show the flame based on streak
   const streakDays = useMemo(() => {

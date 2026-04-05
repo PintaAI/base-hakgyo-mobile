@@ -1,4 +1,4 @@
-import { Colors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import React, { useEffect, useRef } from 'react';
 import { Animated, View, useColorScheme } from 'react-native';
 
@@ -10,9 +10,9 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ width = '100%', height = 20, borderRadius = 4, style }: SkeletonProps) {
+  const theme = useTheme();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const theme = isDark ? Colors.dark : Colors.light;
   
   const animatedValue = useRef(new Animated.Value(0)).current;
 
