@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "723859451127",
+    "project_id": "hakgyo-52233",
+    "storage_bucket": "hakgyo-52233.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:723859451127:android:81e7f97ddcb1c0d2a4b7f2",
+        "android_client_info": {
+          "package_name": "com.rorez.hakgyo.prev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0MWie1IgGeJxXrJTdYlMsbnXaUmYJ-pY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:723859451127:android:81e7f97ddcb1c0d2a4b7f2",
+        "android_client_info": {
+          "package_name": "com.rorez.hakgyo.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0MWie1IgGeJxXrJTdYlMsbnXaUmYJ-pY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

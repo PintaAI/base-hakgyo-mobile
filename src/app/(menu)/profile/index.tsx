@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useAuth } from 'hakgyo-expo-sdk';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { JoinedKelasList } from '@/components/joined-kelas-list';
 import { Background } from '@/components/themed-background';
@@ -14,6 +15,7 @@ export default function ProfileScreen() {
   const { user, signOut, refreshSession } = useAuth();
   const { joinedKelas, isLoading, error, refreshJoinedKelas } = useKelas();
   const [refreshing, setRefreshing] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const handleSignOut = async () => {
     try {
@@ -102,6 +104,7 @@ export default function ProfileScreen() {
             colors={['#6366f1']}
           />
         }
+        contentContainerStyle={{ paddingTop: insets.top + 16, paddingBottom: insets.bottom + 90 }}
       >
         <View style={{ padding: 16, gap: 12 }}>
           {/* Profile Header Card with Stats */}

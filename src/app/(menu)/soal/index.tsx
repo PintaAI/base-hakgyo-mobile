@@ -4,10 +4,11 @@ import { useKelas } from '@/contexts/kelas-context';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { router } from 'expo-router';
-import 'expo-symbols';
+import { FileText, Timer } from 'lucide-react-native';
 import { KoleksiSoal, soalApi, useAuth } from 'hakgyo-expo-sdk';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function soalScreen() {
   const { user } = useAuth();
@@ -18,6 +19,7 @@ export default function soalScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const fetchCollections = useCallback(async () => {
     if (!user?.id) {
@@ -62,14 +64,14 @@ export default function soalScreen() {
       <MenuHeader
         title="Bank Soal"
         subtitle={selectedKelas ? `Dari kelas ${selectedKelas.title}` : 'Seluruh koleksi soal yang tersedia untuk latihan'}
-        leftIconName="doc.text"
-        rightIconName="timer"
+        leftIcon={FileText}
+        rightIcon={Timer}
         onRightIconPress={() => router.push('/(menu)/soal/tryout' as never)}
       />
       <ScrollView
         className="flex-1 px-2 pt-5"
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{ flexGrow: 1, gap: 5 }}
+        contentContainerStyle={{ flexGrow: 1, gap: 5, paddingBottom: insets.bottom + 105 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

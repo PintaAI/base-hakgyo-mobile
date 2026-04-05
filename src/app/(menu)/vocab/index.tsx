@@ -1,4 +1,5 @@
 import { Background, MenuHeader } from '@/components';
+import { Book, Gamepad2 } from 'lucide-react-native';
 import { VocabSetCard, VocabSetCardSkeleton } from '@/components/vocab-set-card';
 import { useKelas } from '@/contexts/kelas-context';
 import { Colors } from '@/constants/theme';
@@ -6,7 +7,8 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { router } from 'expo-router';
 import { useAuth, vocabularyApi, VocabularySet } from 'hakgyo-expo-sdk';
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, RefreshControl, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, RefreshControl, ScrollView, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function VocabScreen() {
   const { user } = useAuth();
@@ -21,6 +23,7 @@ export default function VocabScreen() {
   const [newDescription, setNewDescription] = useState('');
   const [adding, setAdding] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const fetchVocabSets = useCallback(async () => {
     if (!user?.id) {
@@ -119,8 +122,8 @@ export default function VocabScreen() {
         <MenuHeader
           title="Kosa Kata"
           subtitle={selectedKelas ? `Dari kelas ${selectedKelas.title}` : 'Kumpulan kosa kata'}
-          leftIconName="book.closed"
-          rightIconName="gamecontroller"
+          leftIcon={Book}
+          rightIcon={Gamepad2}
           onRightIconPress={() => router.push('/game')}
         />
 
@@ -182,7 +185,7 @@ export default function VocabScreen() {
         <ScrollView
           className="flex-1 px-2 mt-2"
           contentInsetAdjustmentBehavior="automatic"
-          contentContainerStyle={{ flexGrow: 1, gap: 5, paddingBottom: 24 }}
+          contentContainerStyle={{ flexGrow: 1, gap: 5, paddingBottom: insets.bottom + 105 }}
           keyboardShouldPersistTaps="handled"
           refreshControl={
             <RefreshControl

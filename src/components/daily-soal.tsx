@@ -128,8 +128,7 @@ export function DailySoal() {
   return (
     <>
       {/* Collapsed preview card - always visible */}
-      <Pressable
-        onPress={handleOpenQuiz}
+      <View
         style={{
           backgroundColor: theme.card,
           borderRadius: 12,
@@ -190,7 +189,8 @@ export function DailySoal() {
           </View>
 
           {/* Start Button */}
-          <View
+          <Pressable
+            onPress={handleOpenQuiz}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -205,9 +205,9 @@ export function DailySoal() {
               Mulai Latihan
             </Text>
             <ChevronRight size={16} color={theme.background} />
-          </View>
+          </Pressable>
         </View>
-      </Pressable>
+      </View>
 
       {/* Modal for quiz */}
       <Modal
