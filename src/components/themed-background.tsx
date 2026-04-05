@@ -1,8 +1,7 @@
-import { ImageBackground, type ImageStyle, StyleSheet } from 'react-native';
 import { useColorScheme } from 'nativewind';
+import { ImageBackground, type ImageStyle, StyleSheet } from 'react-native';
 
-// Note: file is named "bakcground.png" (typo in asset filename)
-const backgroundImage = require('@/assets/bakcground.png');
+const backgroundImage = require('@/assets/background.png');
 
 interface BackgroundProps {
   lightOpacity?: number;

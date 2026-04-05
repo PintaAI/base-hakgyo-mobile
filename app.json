@@ -1,28 +1,28 @@
 {
   "expo": {
-    "name": "base-hakgyo-mobile",
-    "slug": "base-hakgyo-mobile",
+    "name": "Hakgyo",
+    "slug": "hakgyo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "basehakgyomobile",
+    "scheme": "hakgyo",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.rorez.basehakgyomobile",
+      "bundleIdentifier": "com.rorez.hakgyo",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#ffffff",
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "monochromeImage": "./assets/adaptive-icon.png"
+
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.rorez.basehakgyomobile"
+      "package": "com.rorez.hakgyo"
     },
     "web": {
       "output": "static",
@@ -35,7 +35,7 @@
         {
           "backgroundColor": "#208AEF",
           "android": {
-            "image": "./assets/images/splash-icon.png",
+            "image": "./assets/splash-icon-light.png",
             "imageWidth": 76
           }
         }
