@@ -1,6 +1,7 @@
 import { VocabularySet } from 'hakgyo-expo-sdk';
 import { Pressable, Text, View } from 'react-native';
 import { IconRenderer } from './icon-renderer';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface VocabSetCardProps {
   set: VocabularySet;
@@ -64,5 +65,30 @@ export function VocabSetCard({ set, onPress, onLongPress, isUserOwned = false }:
         </Text>
       )}
     </Pressable>
+  );
+}
+
+export function VocabSetCardSkeleton() {
+  return (
+    <View className="p-4 bg-card rounded-lg border shadow border-border">
+      <View className="flex-row items-start gap-3">
+        <View className="w-10 h-10 rounded-lg border border-border bg-background">
+          <Skeleton height={40} width={40} borderRadius={8} />
+        </View>
+        <View className="flex-1">
+          <Skeleton height={20} width="70%" borderRadius={4} />
+          <View className="self-start px-2 py-0.5 bg-primary/20 rounded mt-1">
+            <Skeleton height={12} width={60} borderRadius={2} />
+          </View>
+        </View>
+      </View>
+      <Skeleton height={14} width="90%" borderRadius={4} style={{ marginTop: 8 }} />
+
+      {/* Progress Bar Skeleton */}
+      <View className="mt-3">
+        <Skeleton height={8} width="100%" borderRadius={4} />
+        <Skeleton height={12} width="40%" borderRadius={4} style={{ marginTop: 4 }} />
+      </View>
+    </View>
   );
 }

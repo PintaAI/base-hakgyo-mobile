@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 
+import { Background } from '@/components/themed-background';
 import { HtmlRenderer } from '@/components/html-renderer';
 
 export default function MateriDetailScreen() {
@@ -92,146 +93,133 @@ export default function MateriDetailScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" className="text-primary" />
-        <Text className="mt-3 text-muted-foreground">Loading material...</Text>
+      <View className="flex-1">
+        <Background />
+        <View className="flex-1 items-center justify-center">
+          <View className="bg-card rounded-2xl border border-border p-6 items-center">
+            <ActivityIndicator size="large" className="text-primary" />
+            <Text className="mt-3 text-muted-foreground text-sm">Loading material...</Text>
+          </View>
+        </View>
       </View>
     );
   }
 
   if (error || !materi) {
     return (
-      <View className="flex-1 p-6 items-center justify-center">
-        <View className="bg-card rounded-2xl border border-border p-6 items-center max-w-xs">
-          <View className="w-14 h-14 rounded-full bg-error-muted items-center justify-center">
-            <FontAwesome name="exclamation-circle" size={24} color="#ef4444" />
-          </View>
-          <Text className="mt-4 text-foreground text-lg font-semibold text-center">
-            Unable to Load
-          </Text>
-          <Text className="mt-2 text-muted-foreground text-sm text-center">
-            {error || 'Material not found'}
-          </Text>
-          <Pressable
-            onPress={fetchMateri}
-            className="mt-5 bg-primary px-6 py-3 rounded-xl"
-          >
-            <Text className="text-primary-foreground font-semibold">
-              Try Again
+      <View className="flex-1">
+        <Background />
+        <View className="flex-1 p-6 items-center justify-center">
+          <View className="bg-card rounded-2xl border border-border p-6 items-center max-w-xs">
+            <View className="w-16 h-16 rounded-full bg-error-muted items-center justify-center">
+              <FontAwesome name="exclamation-circle" size={32} color="#ef4444" />
+            </View>
+            <Text className="mt-4 text-foreground text-lg font-semibold text-center">
+              Unable to Load
             </Text>
-          </Pressable>
+            <Text className="mt-2 text-muted-foreground text-sm text-center">
+              {error || 'Material not found'}
+            </Text>
+            <Pressable
+              onPress={fetchMateri}
+              className="mt-5 bg-primary px-6 py-3 rounded-xl active:opacity-80"
+            >
+              <Text className="text-primary-foreground font-semibold">
+                Try Again
+              </Text>
+            </Pressable>
+          </View>
         </View>
       </View>
     );
   }
 
   return (
-    <ScrollView className="flex-1" contentInsetAdjustmentBehavior="automatic">
-      <View className="p-4">
-        {/* Header Card */}
-        <View className="bg-card rounded-xl border border-border overflow-hidden">
-          {/* Order Badge */}
-          <View className="flex-row items-center justify-between p-4 border-b border-border">
-            <View className="flex-row items-center gap-2">
-              <View className="w-8 h-8 rounded-lg bg-primary/20 items-center justify-center">
-                <FontAwesome name="book" size={14} color="#2563eb" />
-              </View>
-              <Text className="text-muted-foreground text-sm font-medium">
-                Material #{materi.order}
-              </Text>
-            </View>
-            {materi.isDemo && (
-              <View className="bg-info-muted px-2 py-1 rounded">
-                <Text className="text-xs font-semibold text-info">FREE</Text>
-              </View>
-            )}
-          </View>
-
-          {/* Title */}
-          <View className="p-4 pb-0">
-            <Text className="text-foreground text-xl font-bold">
-              {materi.title}
-            </Text>
-            {materi.description && (
-              <Text className="text-muted-foreground text-sm mt-1">
-                {materi.description}
-              </Text>
-            )}
-          </View>
-
-          {/* Content */}
-          {materi.htmlDescription && (
+    <View className="flex-1">
+      <Background />
+      <ScrollView className="flex-1" contentInsetAdjustmentBehavior="automatic">
+        <View className="p-4 pb-8">
+          {/* Header Card - Matching kelasid design */}
+          <View className="bg-card rounded-xl border border-border overflow-hidden">
+            {/* Title & Badges */}
             <View className="p-4">
-              <View className="border-t border-border pt-4">
-                <HtmlRenderer html={materi.htmlDescription} />
+              <View className="flex-row items-start justify-between">
+                <View className="flex-1 mr-2">
+                  <View className="flex-row items-center gap-2 flex-wrap">
+                    <Text className="text-foreground text-lg font-bold shrink-0" numberOfLines={1}>
+                      {materi.title}
+                    </Text>
+                    {/* Assessment Badge */}
+                    {materi.koleksiSoalId && (
+                      <View className="flex-row items-center gap-1 bg-warning-muted px-2 py-0.5 rounded">
+                        <FontAwesome name="clipboard-list" size={8} color="#d97706" />
+                        <Text className="text-[10px] font-semibold text-warning-foreground">Assessment</Text>
+                      </View>
+                    )}
+                  </View>
+                  {/* Passing Score */}
+                  {materi.koleksiSoalId && materi.passingScore && (
+                    <Text className="text-xs text-muted-foreground mt-1">
+                      Passing score: {materi.passingScore}%
+                    </Text>
+                  )}
+                </View>
+              </View>
+
+              {/* Description */}
+              {materi.description && (
+                <View className="mt-3">
+                  <Text className="text-sm text-foreground leading-relaxed">
+                    {materi.description}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          {/* Content Section */}
+          {materi.htmlDescription && (
+            <View className="mt-4">
+              <Text className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                Content
+              </Text>
+              <View className="bg-card rounded-xl border border-border overflow-hidden">
+                <View className="p-4">
+                  <HtmlRenderer html={materi.htmlDescription} />
+                </View>
               </View>
             </View>
           )}
 
-          {/* Assessment Info */}
-          {materi.koleksiSoalId && (
-            <View className="p-4 border-t border-border">
-              <View className="flex-row items-center gap-3 mb-3">
-                <View className="w-10 h-10 rounded-lg bg-warning-muted items-center justify-center">
-                  <FontAwesome name="clipboard-list" size={18} color="#f59e0b" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-foreground font-semibold">
-                    Assessment Available
-                  </Text>
-                  <Text className="text-muted-foreground text-xs">
-                    {materi.passingScore
-                      ? `Passing score: ${materi.passingScore}%`
-                      : 'Complete the quiz to finish this material'}
-                  </Text>
-                </View>
-              </View>
+          {/* Action Button */}
+          <View className="mt-4">
+            {materi.koleksiSoalId ? (
               <Pressable
                 onPress={handleStartAssessment}
-                className="bg-warning rounded-xl py-3 items-center"
+                className="flex-row items-center justify-center gap-2 bg-warning rounded-xl py-3 active:opacity-80"
               >
-                <Text className="text-warning-foreground font-semibold">
-                  Start Assessment
-                </Text>
+                <FontAwesome name="clipboard-list" size={14} color="#fff" />
+                <Text className="text-white text-sm font-semibold">Start Assessment</Text>
               </Pressable>
-            </View>
-          )}
-        </View>
-
-        {/* Complete Button */}
-        {!materi.koleksiSoalId && (
-          <Pressable
-            onPress={handleComplete}
-            disabled={completing}
-            className={`mt-4 rounded-xl py-4 items-center ${
-              completing ? 'bg-muted' : 'bg-primary'
-            }`}
-          >
-            {completing ? (
-              <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <View className="flex-row items-center gap-2">
-                <FontAwesome name="check-circle" size={18} color="#fff" />
-                <Text className="text-primary-foreground font-semibold">
-                  Mark as Complete
-                </Text>
-              </View>
+              <Pressable
+                onPress={handleComplete}
+                disabled={completing}
+                className="flex-row items-center justify-center gap-2 rounded-xl py-3 active:opacity-80 bg-success"
+              >
+                {completing ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <FontAwesome name="check-circle" size={14} color="#fff" />
+                    <Text className="text-white text-sm font-semibold">Mark as Complete</Text>
+                  </>
+                )}
+              </Pressable>
             )}
-          </Pressable>
-        )}
-
-        {/* Navigation Hint */}
-        <View className="mt-4 p-4 bg-muted/50 rounded-xl">
-          <View className="flex-row items-center gap-2">
-            <FontAwesome name="info-circle" size={14} color="#6b7280" />
-            <Text className="text-muted-foreground text-xs">
-              {materi.koleksiSoalId
-                ? 'Complete the assessment to mark this material as done.'
-                : 'Mark this material as complete to track your progress.'}
-            </Text>
           </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

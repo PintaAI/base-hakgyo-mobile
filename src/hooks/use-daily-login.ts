@@ -4,8 +4,8 @@
  * Persists last login date to avoid unnecessary API calls
  */
 
-import { gamificationApi } from 'hakgyo-expo-sdk';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { gamificationApi } from 'hakgyo-expo-sdk';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 const DAILY_LOGIN_STORAGE_KEY = '@hakgyo/daily_login_last_date';

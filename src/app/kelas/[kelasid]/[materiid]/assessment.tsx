@@ -1,18 +1,18 @@
 import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-    AssessmentAnswer,
-    materiApi,
-    MateriAssessmentConfig,
-    MateriAssessmentResult,
+  AssessmentAnswer,
+  materiApi,
+  MateriAssessmentConfig,
+  MateriAssessmentResult,
 } from 'hakgyo-expo-sdk';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Pressable,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  Text,
+  View,
 } from 'react-native';
 
 import { AssessmentQuizViewer, AssessmentResultData } from '@/components/quiz-viewer';
@@ -154,25 +154,7 @@ export default function MateriAssessmentScreen() {
   }
 
   return (
-    <View className="flex-1 bg-background">
-      {/* Header */}
-      <View className="bg-card border-b border-border px-4 py-3">
-        <View className="flex-row items-center justify-between">
-          <Pressable onPress={() => router.back()} className="p-2">
-            <FontAwesome name="arrow-left" size={20} color="#2563eb" />
-          </Pressable>
-          <View className="flex-row items-center gap-2">
-            <FontAwesome name="clipboard-list" size={18} color="#f59e0b" />
-            <Text className="text-foreground font-semibold">{config.title}</Text>
-          </View>
-          <View className="bg-muted px-3 py-1 rounded-lg">
-            <Text className="text-muted-foreground text-sm">
-              Pass: {config.passingScore}%
-            </Text>
-          </View>
-        </View>
-      </View>
-
+    <View className="flex-1">
       {/* Quiz Viewer */}
       <AssessmentQuizViewer
         questions={config.questions}

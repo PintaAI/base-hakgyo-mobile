@@ -4,15 +4,17 @@ import { useActiveTryouts } from '@/hooks/use-active-tryouts';
 import { useDailyLogin } from '@/hooks/use-daily-login';
 import { router } from 'expo-router';
 import { useAuth } from 'hakgyo-expo-sdk';
-import React, { useEffect, useMemo, useRef } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, View } from 'react-native';
 
 export default function MenuScreen() {
   const { user, refreshSession } = useAuth();
   const { isLoading, result } = useDailyLogin();
-  const { joinedKelas, selectedKelas, setSelectedKelas, isLoading: kelasLoading } = useKelas();
-  const { activeTryouts, loading: tryoutsLoading } = useActiveTryouts();
+  const { joinedKelas, selectedKelas, setSelectedKelas, isLoading: kelasLoading, refreshJoinedKelas } = useKelas();
+  const { activeTryouts, loading: tryoutsLoading, refetch: refetchTryouts } = useActiveTryouts();
   const hasRefreshedRef = useRef(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Refresh user stats after daily login completes successfully
   useEffect(() => {
@@ -25,11 +27,12 @@ export default function MenuScreen() {
 
   // Convert joined kelas to submenu items with "All" option
   const kelasSubmenuItems = useMemo(() => [
-    { id: 'all', label: 'Semua Kelas' },
+    { id: 'all', label: 'Semua Kelas', icon: 'square.grid.2x2' as const },
     ...joinedKelas.map(kelas => ({
       id: String(kelas.id),
       label: kelas.title,
       thumbnail: kelas.thumbnail,
+      icon: kelas.thumbnail ? undefined : 'book.closed' as const,
     })),
   ], [joinedKelas]);
 
@@ -48,6 +51,24 @@ export default function MenuScreen() {
   // Get selected kelas id for the dropdown (use 'all' when no kelas selected)
   const selectedKelasId = selectedKelas ? String(selectedKelas.id) : 'all';
 
+  // Handle pull-to-refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        refreshSession(),
+        refreshJoinedKelas(),
+        refetchTryouts(),
+      ]);
+      // Increment refresh key to trigger DailyVocab and DailySoal refresh
+      setRefreshKey(prev => prev + 1);
+    } catch (error) {
+      console.error('Refresh failed:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshSession, refreshJoinedKelas, refetchTryouts]);
+
   return (
     <KeyboardAvoidingView
       className="flex-1"
@@ -59,7 +80,7 @@ export default function MenuScreen() {
         <MenuHeader
           title={selectedKelas?.title ?? 'Hakgyo'}
           subtitle={user?.name ? `안녕하세요, ${user.name}!` : '안녕하세요!'}
-          leftIconImage={require('@/assets/images/favicon.png')}
+          leftIconImage={selectedKelas?.thumbnail ? { uri: selectedKelas.thumbnail } : require('@/assets/images/favicon.png')}
           rightIconName="bell"
           onRightIconPress={() => router.push('/notification')}
           dailyLoginState={{
@@ -81,6 +102,14 @@ export default function MenuScreen() {
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive"
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#6366f1"
+              colors={['#6366f1']}
+            />
+          }
         >
           {user && (
             <UserStats
@@ -91,8 +120,8 @@ export default function MenuScreen() {
             />
           )}
           <ActiveTryoutBanner tryouts={activeTryouts} />
-          <DailyVocab />
-          <DailySoal />
+          <DailyVocab key={`vocab-${refreshKey}`} />
+          <DailySoal key={`soal-${refreshKey}`} />
 
         </ScrollView>
       </View>

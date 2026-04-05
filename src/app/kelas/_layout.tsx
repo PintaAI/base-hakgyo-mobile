@@ -32,6 +32,13 @@ export default function KelasLayout() {
           headerShown: true,
         }}
       />
+      <Stack.Screen
+        name="[kelasid]/[materiid]/assessment"
+        options={{
+          headerShown: false,
+          presentation: 'modal',
+        }}
+      />
     </Stack>
   );
 }

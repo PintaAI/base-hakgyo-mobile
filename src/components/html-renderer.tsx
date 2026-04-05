@@ -1,10 +1,8 @@
+import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
 import * as React from 'react';
 import { Image, Pressable, Text, View, type ImageStyle, type TextStyle } from 'react-native';
-import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
-
-// TODO: Install expo-audio and create a new dev build
-// npx expo install expo-audio
-
+import { useEvent } from 'expo';
+import { useAudioPlayer } from 'expo-audio';
 // Types for parsed HTML elements
 type HtmlElement = {
   type: 'text' | 'element';
@@ -55,108 +53,205 @@ function stripWrapperTags(html: string): string {
 
 /**
  * Preprocess HTML: replace complex audio embed divs with a simple <audio> tag.
- * The DB stores: <div data-type="audio" data-src="..." ...>...deeply nested divs + <audio>...</div>
- * We find the outer div using depth counting and replace it entirely.
+ * Uses a two-pass approach: first find all audio divs, then replace them.
+ * The DB stores: <div data-type="audio" data-src="..." ...>...deeply nested divs...</div>
  */
 function preprocessAudioEmbeds(html: string): string {
-  const openAudioDiv = /<div([^>]*data-type="audio"[^>]*)>/i;
-  const match = openAudioDiv.exec(html);
-  if (!match) return html;
-
-  const attrStr = match[1];
-  const getAttr = (name: string) => {
-    const m = attrStr.match(new RegExp(`${name}="([^"]*)"`));
-    return m ? m[1] : '';
-  };
-  const src = getAttr('data-src');
-  const filename = getAttr('data-filename');
-  const duration = getAttr('data-duration');
-  if (!src) return html;
-
-  // Walk from match index, count depth to find the matching closing </div>
-  const start = match.index;
-  let depth = 0;
-  let i = start;
-  while (i < html.length) {
-    if (html[i] === '<') {
-      if (html.substring(i).match(/^<div/i)) {
+  // Find all audio div opening tags and their positions
+  const audioDivs: Array<{ start: number; end: number; src: string; filename: string; duration: string }> = [];
+  
+  // Regex to find opening audio div tags
+  const audioDivRegex = /<div([^>]*?)data-type="audio"([^>]*?)>/gi;
+  let match: RegExpExecArray | null;
+  
+  while ((match = audioDivRegex.exec(html)) !== null) {
+    const attrStr = match[1] + match[2];
+    
+    // Extract data attributes
+    const getAttr = (name: string): string => {
+      const attrRegex = new RegExp(`${name}="([^"]*)"`, 'i');
+      const m = attrStr.match(attrRegex);
+      return m ? m[1] : '';
+    };
+    
+    const src = getAttr('data-src');
+    if (!src) continue;
+    
+    const filename = getAttr('data-filename');
+    const duration = getAttr('data-duration');
+    
+    // Find the matching closing </div> by counting depth
+    const startIndex = match.index;
+    let depth = 1;
+    let pos = startIndex + match[0].length;
+    
+    while (pos < html.length && depth > 0) {
+      const nextOpen = html.indexOf('<div', pos);
+      const nextClose = html.indexOf('</div>', pos);
+      
+      if (nextClose === -1) break;
+      
+      if (nextOpen !== -1 && nextOpen < nextClose) {
         depth++;
-        i += 4;
-      } else if (html.substring(i).match(/^<\/div>/i)) {
+        pos = nextOpen + 4;
+      } else {
         depth--;
         if (depth === 0) {
-          const end = i + 6; // length of </div>
-          const replacement = `<audio src="${src}" data-filename="${filename}" data-duration="${duration}"></audio>`;
-          return html.substring(0, start) + replacement + html.substring(end);
+          audioDivs.push({
+            start: startIndex,
+            end: nextClose + 6,
+            src,
+            filename,
+            duration,
+          });
+          break;
         }
-        i += 6;
-      } else {
-        i++;
+        pos = nextClose + 6;
       }
-    } else {
-      i++;
     }
   }
-
-  return html;
+  
+  // Replace from end to start to preserve indices
+  let result = html;
+  for (let i = audioDivs.length - 1; i >= 0; i--) {
+    const { start, end, src, filename, duration } = audioDivs[i];
+    const replacement = `<audio src="${src}" data-filename="${filename}" data-duration="${duration}"></audio>`;
+    result = result.substring(0, start) + replacement + result.substring(end);
+  }
+  
+  return result;
 }
 
 /**
  * AudioPlayer component for rendering HTML audio elements
- * Placeholder component - requires expo-audio to be installed
+ * Uses expo-audio for playback
  */
 function AudioPlayer({ src, filename, duration }: { src: string; filename?: string; duration?: string }) {
-  const [isPlaying, setIsPlaying] = React.useState(false);
-  const [currentTime, setCurrentTime] = React.useState(0);
+  const player = useAudioPlayer(src);
 
-  // Placeholder: Format duration string
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Parse duration from string if available
   const parsedDuration = duration ? parseFloat(duration) : 0;
 
+  const [currentTime, setCurrentTime] = React.useState(0);
+  const [totalDuration, setTotalDuration] = React.useState(0);
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const [isEnded, setIsEnded] = React.useState(false);
+  const [isSeeking, setIsSeeking] = React.useState(false);
+  const [seekProgress, setSeekProgress] = React.useState(0);
+  const progressBarWidth = React.useRef(0);
+
+  const status = useEvent(player, 'playbackStatusUpdate');
+
+  React.useEffect(() => {
+    if (status) {
+      setCurrentTime(status.currentTime);
+      setTotalDuration(status.duration);
+      setIsPlaying(status.playing);
+      // Detect end: playing stopped and near the end of duration
+      if (!status.playing && status.duration > 0 && status.currentTime >= status.duration - 0.1) {
+        setIsEnded(true);
+      } else if (status.playing) {
+        setIsEnded(false);
+      }
+    }
+  }, [status]);
+
+  React.useEffect(() => {
+    return () => {
+      try { player.pause(); } catch (_) {}
+    };
+  }, [player]);
+
+  const displayDuration = totalDuration > 0 ? totalDuration : parsedDuration;
+  const liveProgress = displayDuration > 0 ? Math.min(currentTime / displayDuration, 1) : 0;
+  const progress = isSeeking ? seekProgress : liveProgress;
+
+  const handleSeek = (pageX: number, containerX: number) => {
+    const barWidth = progressBarWidth.current;
+    if (barWidth <= 0 || displayDuration <= 0) return;
+    const ratio = Math.min(Math.max((pageX - containerX) / barWidth, 0), 1);
+    const seekTo = ratio * displayDuration;
+    setSeekProgress(ratio);
+    setCurrentTime(seekTo);
+    player.seekTo(seekTo);
+  };
+
   const togglePlay = () => {
-    // TODO: Implement with expo-audio
-    // For now, just toggle the playing state for UI feedback
-    setIsPlaying(!isPlaying);
+    if (isPlaying) player.pause();
+    else player.play();
   };
 
   const replay = () => {
-    // TODO: Implement with expo-audio
+    player.seekTo(0);
+    player.play();
     setCurrentTime(0);
-    setIsPlaying(true);
+    setIsEnded(false);
   };
 
+  const displayName = filename
+    ? filename.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')
+    : 'Audio';
+
   return (
-    <View className="border rounded-lg overflow-hidden bg-card my-2 flex-row items-center px-3 py-2 gap-3">
+    <View className="my-3 rounded-xl border border-border bg-card flex-row items-center px-3 py-3 gap-3">
+      {/* Left: single action button */}
       <Pressable
-        onPress={togglePlay}
-        className="rounded-full w-10 h-10 items-center justify-center bg-primary shrink-0"
+        onPress={isEnded ? replay : togglePlay}
+        className="w-10 h-10 rounded-full items-center justify-center bg-primary shrink-0 active:opacity-75"
       >
-        {isPlaying ? (
-          <FontAwesome name="pause" size={18} color="#fff" />
+        {isEnded ? (
+          <FontAwesome name="rotate-left" size={15} color="#fff" />
+        ) : isPlaying ? (
+          <FontAwesome name="pause" size={15} color="#fff" />
         ) : (
-          <FontAwesome name="play" size={18} color="#fff" />
+          <FontAwesome name="play" size={15} color="#fff" style={{ marginLeft: 2 }} />
         )}
       </Pressable>
-      <Text className="text-xs text-muted-foreground flex-1">
-        {formatTime(currentTime)} / {parsedDuration > 0 ? formatTime(parsedDuration) : '--:--'}
-      </Text>
-      <Pressable
-        onPress={replay}
-        className="rounded-full w-9 h-9 items-center justify-center shrink-0"
-      >
-        <FontAwesome name="rotate-left" size={14} color="#000" />
-      </Pressable>
-      {filename && (
-        <Text className="text-xs text-muted-foreground" numberOfLines={1}>
-          {filename}
-        </Text>
-      )}
+
+      {/* Right: filename + progress + time */}
+      <View className="flex-1 gap-1">
+        <View className="flex-row items-center gap-1.5">
+          <Text className="text-sm">🎵</Text>
+          <Text className="flex-1 text-sm font-medium text-foreground" numberOfLines={1}>
+            {displayName}
+          </Text>
+        </View>
+        <View
+          className="h-4 justify-center"
+          onLayout={(e) => { progressBarWidth.current = e.nativeEvent.layout.width; }}
+          onStartShouldSetResponder={() => true}
+          onMoveShouldSetResponder={() => true}
+          onResponderGrant={(e) => {
+            setIsSeeking(true);
+            handleSeek(e.nativeEvent.pageX, e.nativeEvent.locationX < 0 ? e.nativeEvent.pageX : e.nativeEvent.pageX - e.nativeEvent.locationX);
+          }}
+          onResponderMove={(e) => {
+            const containerX = e.nativeEvent.pageX - e.nativeEvent.locationX;
+            handleSeek(e.nativeEvent.pageX, containerX);
+          }}
+          onResponderRelease={() => { setIsSeeking(false); }}
+        >
+          <View className="h-1.5 rounded-full bg-muted overflow-hidden">
+            <View className="h-full rounded-full bg-primary" style={{ width: `${progress * 100}%` }} />
+          </View>
+          {/* Thumb indicator */}
+          <View
+            className="absolute w-3 h-3 rounded-full bg-primary border-2 border-background"
+            style={{ left: `${progress * 100}%`, top: 2, marginLeft: -6 }}
+          />
+        </View>
+        <View className="flex-row justify-between">
+          <Text className="text-xs text-muted-foreground">{formatTime(currentTime)}</Text>
+          <Text className="text-xs text-muted-foreground">
+            {displayDuration > 0 ? formatTime(displayDuration) : '--:--'}
+          </Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -223,11 +318,14 @@ function parseHtml(html: string): HtmlElement[] {
           attributes,
           children: [],
         });
+        // Advance past the self-closing tag and continue parsing
+        remaining = remaining.substring(tagStartIndex + fullTag.length);
+        continue;
       } else {
-        // Malformed HTML, treat as text
+        // Malformed HTML, treat as text and stop
         elements.push({ type: 'text', content: remaining });
+        break;
       }
-      break;
     }
 
     // Extract content between tags

@@ -2,7 +2,8 @@ import { Colors } from '@/constants/theme';
 import { useAuth, vocabularyApi, VocabularyItem } from 'hakgyo-expo-sdk';
 import { AlertCircle, BookOpen, HelpCircle, Send } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, FlatList, Keyboard, Pressable, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { Animated, FlatList, Keyboard, Pressable, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { DailyVocabSkeleton } from './skeletons';
 
 interface VocabCardProps {
   item: VocabularyItem;
@@ -244,24 +245,7 @@ export function DailyVocab() {
   };
 
   if (isLoading) {
-    return (
-      <View
-        style={{
-          backgroundColor: theme.card,
-          borderRadius: 12,
-          borderWidth: 1,
-          borderColor: theme.border,
-          padding: 24,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <ActivityIndicator size="small" color={theme.primary} />
-        <Text style={{ marginTop: 8, color: theme.mutedForeground, fontSize: 14 }}>
-          Memuat kosa kata...
-        </Text>
-      </View>
-    );
+    return <DailyVocabSkeleton />;
   }
 
   if (error) {

@@ -1,7 +1,7 @@
 import { useTheme } from '@/hooks/use-theme';
 import { SymbolView, type SFSymbol } from 'expo-symbols';
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Image, Pressable, Text, View, type ImageSourcePropType } from 'react-native';
+import { Animated, Dimensions, Easing, Image, Modal, Pressable, Text, View, type ImageSourcePropType } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface DailyLoginState {
@@ -196,19 +196,21 @@ export function MenuHeader({
   return (
     <View className={containerClass} style={gradientBackground}>
       {(leftIconName || leftIconImage) && (
-        <View className="p-2 -ml-2 rounded-lg bg-primary/10">
+        <View className="-ml-2 rounded-lg bg-primary/10 overflow-hidden">
           {leftIconImage ? (
             <Image
               source={leftIconImage}
-              style={{ width: 28, height: 28 }}
-              resizeMode="contain"
+              style={{ width: 36, height: 36, borderRadius: 8 }}
+              resizeMode="cover"
             />
           ) : (
-            <SymbolView
-              name={leftIconName!}
-              size={28}
-              tintColor={theme.foreground}
-            />
+            <View className="p-2">
+              <SymbolView
+                name={leftIconName!}
+                size={28}
+                tintColor={theme.foreground}
+              />
+            </View>
           )}
         </View>
       )}
@@ -249,44 +251,62 @@ export function MenuHeader({
         
         {/* Dropdown Menu */}
         {submenu && isDropdownVisible && submenuItems.length > 0 && (
-          <View
-            className="absolute top-full left-0 right-0 mt-2 bg-background dark:bg-muted rounded-lg shadow-lg border border-border z-50"
-            style={{ minWidth: 150 }}
+          <Modal
+            transparent
+            visible={isDropdownVisible}
+            onRequestClose={() => setIsDropdownVisible(false)}
+            animationType="none"
           >
-            {submenuItems.map((item, index) => (
-              <Pressable
-                key={item.id}
-                onPress={() => handleSubmenuPress(item)}
-                className={`flex-row items-center gap-2 px-4 py-3 ${index === 0 ? 'rounded-t-lg' : ''} ${index === submenuItems.length - 1 ? 'rounded-b-lg' : ''} ${item.id === selectedSubmenuId ? 'bg-primary/10' : ''}`}
+            <Pressable
+              className="flex-1"
+              onPress={() => setIsDropdownVisible(false)}
+              style={{ backgroundColor: 'transparent' }}
+            >
+              <View
+                className="absolute bg-background dark:bg-muted rounded-lg shadow-lg border border-border"
+                style={{
+                  width: Dimensions.get('window').width - 60,
+                  top: insets.top + 25,
+                  left: 52,
+                }}
+                onStartShouldSetResponder={() => true}
               >
-                {item.thumbnail ? (
-                  <Image
-                    source={{ uri: item.thumbnail }}
-                    style={{ width: 28, height: 28, borderRadius: 6 }}
-                    resizeMode="cover"
-                  />
-                ) : item.icon ? (
-                  <SymbolView
-                    name={item.icon}
-                    size={18}
-                    tintColor={item.id === selectedSubmenuId ? theme.primary : theme.foreground}
-                  />
-                ) : null}
-                <Text
-                  className={`text-base flex-1 ${item.id === selectedSubmenuId ? 'text-primary font-semibold' : 'text-foreground'}`}
-                >
-                  {item.label}
-                </Text>
-                {item.id === selectedSubmenuId && (
-                  <SymbolView
-                    name="checkmark"
-                    size={16}
-                    tintColor={theme.primary}
-                  />
-                )}
-              </Pressable>
-            ))}
-          </View>
+                {submenuItems.map((item, index) => (
+                  <Pressable
+                    key={item.id}
+                    onPress={() => handleSubmenuPress(item)}
+                    className={`flex-row items-center gap-2 px-4 py-3 ${index === 0 ? 'rounded-t-lg' : ''} ${index === submenuItems.length - 1 ? 'rounded-b-lg' : ''} ${item.id === selectedSubmenuId ? 'bg-primary/10' : ''}`}
+                  >
+                    {item.thumbnail ? (
+                      <Image
+                        source={{ uri: item.thumbnail }}
+                        style={{ width: 28, height: 28, borderRadius: 6 }}
+                        resizeMode="cover"
+                      />
+                    ) : item.icon ? (
+                      <SymbolView
+                        name={item.icon}
+                        size={18}
+                        tintColor={item.id === selectedSubmenuId ? theme.primary : theme.foreground}
+                      />
+                    ) : null}
+                    <Text
+                      className={`text-base flex-1 ${item.id === selectedSubmenuId ? 'text-primary font-semibold' : 'text-foreground'}`}
+                    >
+                      {item.label}
+                    </Text>
+                    {item.id === selectedSubmenuId && (
+                      <SymbolView
+                        name="checkmark"
+                        size={16}
+                        tintColor={theme.primary}
+                      />
+                    )}
+                  </Pressable>
+                ))}
+              </View>
+            </Pressable>
+          </Modal>
         )}
         
         {/* Dynamic subtitle: show streak info + XP badge after daily login, or greeting message */}
@@ -334,7 +354,7 @@ export function MenuHeader({
       {rightIconName && (
         <Pressable
           onPress={onRightIconPress}
-          className="p-2 -mr-0 -mt-2"
+          className="p-2 mr-0 -mt-2"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <SymbolView

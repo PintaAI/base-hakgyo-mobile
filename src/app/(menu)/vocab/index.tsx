@@ -1,14 +1,18 @@
 import { Background, MenuHeader } from '@/components';
-import { VocabSetCard } from '@/components/vocab-set-card';
+import { VocabSetCard, VocabSetCardSkeleton } from '@/components/vocab-set-card';
 import { useKelas } from '@/contexts/kelas-context';
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { router } from 'expo-router';
 import { useAuth, vocabularyApi, VocabularySet } from 'hakgyo-expo-sdk';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, RefreshControl, ScrollView, Text, TextInput, View } from 'react-native';
 
 export default function VocabScreen() {
   const { user } = useAuth();
   const { selectedKelas } = useKelas();
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme === 'unspecified' ? 'light' : colorScheme];
   const [vocabSets, setVocabSets] = useState<VocabularySet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,12 +20,9 @@ export default function VocabScreen() {
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [adding, setAdding] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    fetchVocabSets();
-  }, [user?.id, selectedKelas?.id]);
-
-  const fetchVocabSets = async () => {
+  const fetchVocabSets = useCallback(async () => {
     if (!user?.id) {
       setLoading(false);
       return;
@@ -40,7 +41,17 @@ export default function VocabScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id, selectedKelas?.id]);
+
+  useEffect(() => {
+    fetchVocabSets();
+  }, [fetchVocabSets]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchVocabSets();
+    setRefreshing(false);
+  }, [fetchVocabSets]);
 
   const handlePress = (id: number) => {
     router.push({ pathname: '/(menu)/vocab/[id]' as const, params: { id: String(id) } });
@@ -171,11 +182,23 @@ export default function VocabScreen() {
         <ScrollView
           className="flex-1 px-2 mt-2"
           contentInsetAdjustmentBehavior="automatic"
-          contentContainerStyle={{ gap: 5, paddingBottom: 24 }}
+          contentContainerStyle={{ flexGrow: 1, gap: 5, paddingBottom: 24 }}
           keyboardShouldPersistTaps="handled"
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={theme.primary}
+              colors={[theme.primary]}
+            />
+          }
         >
           {loading ? (
-            <ActivityIndicator size="large" className="mt-8" />
+            <View className="gap-2">
+              <VocabSetCardSkeleton />
+              <VocabSetCardSkeleton />
+              <VocabSetCardSkeleton />
+            </View>
           ) : !user?.id ? (
             <View className="p-5 bg-card items-center border border-border rounded-lg mt-4">
               <Text className="text-sm text-muted-foreground mb-3">Please sign in to access vocabulary sets</Text>

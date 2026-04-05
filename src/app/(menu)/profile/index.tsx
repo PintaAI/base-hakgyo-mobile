@@ -1,8 +1,8 @@
 import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
 import { router } from 'expo-router';
 import { useAuth } from 'hakgyo-expo-sdk';
-import React, { useMemo } from 'react';
-import { Pressable, ScrollView, Text, View, useColorScheme } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, Text, View, useColorScheme } from 'react-native';
 
 import { JoinedKelasList } from '@/components/joined-kelas-list';
 import { Background } from '@/components/themed-background';
@@ -11,8 +11,9 @@ import { Colors } from '@/constants/theme';
 import { useKelas } from '@/contexts/kelas-context';
 
 export default function ProfileScreen() {
-  const { user, signOut } = useAuth();
-  const { joinedKelas, isLoading, error } = useKelas();
+  const { user, signOut, refreshSession } = useAuth();
+  const { joinedKelas, isLoading, error, refreshJoinedKelas } = useKelas();
+  const [refreshing, setRefreshing] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -22,6 +23,21 @@ export default function ProfileScreen() {
       // Handle sign out error silently
     }
   };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        refreshSession(),
+        refreshJoinedKelas(),
+      ]);
+    } catch (error) {
+      console.error('Refresh failed:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshSession, refreshJoinedKelas]);
+
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const theme = isDark ? Colors.dark : Colors.light;
@@ -80,6 +96,14 @@ export default function ProfileScreen() {
       <ScrollView
         style={{ flex: 1 }}
         contentInsetAdjustmentBehavior="automatic"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#6366f1"
+            colors={['#6366f1']}
+          />
+        }
       >
         <View style={{ padding: 16, gap: 12 }}>
           {/* Profile Header Card with Stats */}

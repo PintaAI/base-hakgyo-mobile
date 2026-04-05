@@ -1,7 +1,14 @@
 import { Colors } from '@/constants/theme';
 import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
-import { useMemo } from 'react';
-import { Text, useColorScheme, View } from 'react-native';
+import { useEffect, useMemo, useRef } from 'react';
+import { Pressable, Text, useColorScheme, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 
 interface UserStatsProps {
   streak: number;
@@ -14,6 +21,61 @@ export function UserStats({ streak, bestStreak, level, xp }: UserStatsProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const theme = isDark ? Colors.dark : Colors.light;
+  const prevStreakRef = useRef(streak);
+
+  // Animation values for weekly calendar fire
+  const todayFireScale = useSharedValue(1);
+  const todayFireRotate = useSharedValue(0);
+
+  // Trigger animation function for weekly calendar only
+  const triggerStreakAnimation = () => {
+    // Reset to initial state first
+    todayFireScale.value = 1;
+    todayFireRotate.value = 0;
+    
+    // Scale up animation
+    todayFireScale.value = withSequence(
+      withTiming(2.0, { duration: 200 }), // Scale up
+      // Shake animation (scale stays roughly the same during shake)
+      withTiming(1.9, { duration: 80 }),
+      withTiming(2.0, { duration: 80 }),
+      withTiming(1.9, { duration: 80 }),
+      withTiming(2.0, { duration: 80 }),
+      withTiming(1.9, { duration: 80 }),
+      withTiming(2.0, { duration: 80 }),
+      // Scale down to normal
+      withTiming(1, { duration: 150 })
+    );
+    
+    // Shake rotation animation (starts after scale up)
+    todayFireRotate.value = withSequence(
+      withTiming(0, { duration: 200 }), // Wait for scale up
+      // Shake left and right
+      withTiming(-0.25, { duration: 80 }),
+      withTiming(0.25, { duration: 80 }),
+      withTiming(-0.2, { duration: 80 }),
+      withTiming(0.2, { duration: 80 }),
+      withTiming(-0.15, { duration: 80 }),
+      withTiming(0.15, { duration: 80 }),
+      withSpring(0, { damping: 12, stiffness: 200 }) // Settle to center
+    );
+  };
+
+  // Trigger animation when streak increases (weekly calendar only)
+  useEffect(() => {
+    if (streak > prevStreakRef.current && prevStreakRef.current > 0) {
+      triggerStreakAnimation();
+    }
+    prevStreakRef.current = streak;
+  }, [streak]);
+
+  // Animated style for today's fire
+  const todayFireStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: todayFireScale.value },
+      { rotate: `${todayFireRotate.value}rad` },
+    ],
+  }));
 
   // Calculate which days of the week should show the flame based on streak
   const streakDays = useMemo(() => {
@@ -32,6 +94,13 @@ export function UserStats({ streak, bestStreak, level, xp }: UserStatsProps) {
 
     return days;
   }, [streak]);
+
+  // Get today's index for special animation
+  const todayDayIndex = useMemo(() => {
+    const today = new Date();
+    const currentDay = today.getDay();
+    return currentDay === 0 ? 6 : currentDay - 1;
+  }, []);
 
   const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
@@ -110,8 +179,12 @@ export function UserStats({ streak, bestStreak, level, xp }: UserStatsProps) {
             </View>
             <View>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <Text style={{ fontWeight: 'bold', fontSize: 18, color: theme.foreground }}>{streak}</Text>
-                <Text style={{ fontSize: 14, color: theme.foreground, fontWeight: 'bold' }}>Day streak</Text>
+                <Text style={{ fontWeight: 'bold', fontSize: 18, color: theme.foreground }}>
+                  {streak}
+                </Text>
+                <Text style={{ fontSize: 14, color: theme.foreground, fontWeight: 'bold' }}>
+                  Day streak
+                </Text>
               </View>
               {bestStreak !== undefined && (
                 <Text style={{ fontSize: 11, color: theme.mutedForeground }}>Best: {bestStreak}</Text>
@@ -165,13 +238,38 @@ export function UserStats({ streak, bestStreak, level, xp }: UserStatsProps) {
                 }}
               >
                 {streakDays[index] && (
-                  <FontAwesome name="fire" size={12} color={theme.destructive} />
+                  <Animated.View
+                    style={index === todayDayIndex ? todayFireStyle : undefined}
+                  >
+                    <FontAwesome name="fire" size={12} color={theme.destructive} />
+                  </Animated.View>
                 )}
               </View>
             </View>
           ))}
         </View>
       </View>
+
+      {/* Dev button to trigger animation - floating */}
+      {__DEV__ && (
+        <Pressable
+          onPress={triggerStreakAnimation}
+          style={{
+            position: 'absolute',
+            bottom: 8,
+            right: 8,
+            backgroundColor: theme.primary,
+            paddingHorizontal: 8,
+            paddingVertical: 4,
+            borderRadius: 4,
+            zIndex: 10,
+          }}
+        >
+          <Text style={{ color: theme.primaryForeground, fontSize: 10, fontWeight: 'bold' }}>
+            🧪
+          </Text>
+        </Pressable>
+      )}
     </View>
   );
 }

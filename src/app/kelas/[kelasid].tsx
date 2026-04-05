@@ -4,6 +4,7 @@ import { Kelas, kelasApi } from 'hakgyo-expo-sdk';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from 'react-native';
 
+import { Background } from '@/components/themed-background';
 import { HtmlRenderer } from '@/components/html-renderer';
 import { useKelas } from '@/contexts/kelas-context';
 import { useTheme } from '@/hooks/use-theme';
@@ -100,7 +101,9 @@ export default function KelasDetailScreen() {
   };
 
   return (
-    <ScrollView className="flex-1" contentInsetAdjustmentBehavior="automatic">
+    <View className="flex-1">
+      <Background />
+      <ScrollView className="flex-1" contentInsetAdjustmentBehavior="automatic">
         {/* Header Card - Combined with Stats, Author, and Members */}
         <View className="p-4">
           <View className="bg-card rounded-xl border border-border overflow-hidden">
@@ -320,10 +323,11 @@ export default function KelasDetailScreen() {
 
         {/* Description */}
         {kelas.htmlDescription && (
-          <View className="px-4 py-2">
+          <View className="px-4 py-2 bg-background">
             <HtmlRenderer html={kelas.htmlDescription} />
           </View>
         )}
       </ScrollView>
+    </View>
   );
 }
