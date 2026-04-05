@@ -1,11 +1,13 @@
-import { BASE_URL } from '@/lib/config';
 import { KelasProvider } from '@/contexts/kelas-context';
+import { useEASUpdate } from '@/hooks/use-eas-update';
+import { usePushNotifications } from '@/hooks/use-notifications';
+import { BASE_URL } from '@/lib/config';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { AuthProvider, initSDK } from 'hakgyo-expo-sdk';
 import React from 'react';
-import { Platform, useColorScheme } from 'react-native';
+import { Platform, StatusBar, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import "../global.css";
 
@@ -40,13 +42,34 @@ GoogleSignin.configure({
   offlineAccess: true,
 });
 
+// Component to handle notification registration
+function NotificationHandler() {
+  // This hook handles:
+  // - Requesting notification permissions
+  // - Getting Expo push token
+  // - Registering token with Hakgyo backend
+  // - Setting up notification listeners
+  usePushNotifications();
+  return null;
+}
+
 export default function RootLayout() {
-  const colorScheme = useColorScheme();  
+  const colorScheme = useColorScheme();
+  
+  // Initialize EAS Update check
+  useEASUpdate();
+  
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <StatusBar
+          barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+          backgroundColor="transparent"
+          translucent
+        />
         <AuthProvider>
           <KelasProvider>
+            <NotificationHandler />
             <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen
               name="auth"

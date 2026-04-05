@@ -1,5 +1,12 @@
 import { useTheme } from '@/hooks/use-theme';
-import { SymbolView, type SFSymbol } from 'expo-symbols';
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Flame,
+  Star,
+  type LucideIcon
+} from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, Easing, Image, Modal, Pressable, Text, View, type ImageSourcePropType } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,16 +22,16 @@ interface DailyLoginState {
 interface SubmenuItem {
   id: string;
   label: string;
-  icon?: SFSymbol;
+  icon?: LucideIcon;
   thumbnail?: string;
 }
 
 interface MenuHeaderProps {
   title: string;
   subtitle?: string;
-  leftIconName?: SFSymbol;
+  leftIcon?: LucideIcon;
   leftIconImage?: ImageSourcePropType;
-  rightIconName?: SFSymbol;
+  rightIcon?: LucideIcon;
   onRightIconPress?: () => void;
   /** Whether to apply safe area inset padding. Defaults to true. */
   insetEnabled?: boolean;
@@ -45,9 +52,9 @@ interface MenuHeaderProps {
 export function MenuHeader({
   title,
   subtitle,
-  leftIconName,
+  leftIcon: LeftIcon,
   leftIconImage,
-  rightIconName,
+  rightIcon: RightIcon,
   onRightIconPress,
   insetEnabled = true,
   centerAlign = false,
@@ -195,23 +202,22 @@ export function MenuHeader({
 
   return (
     <View className={containerClass} style={gradientBackground}>
-      {(leftIconName || leftIconImage) && (
+      {(LeftIcon || leftIconImage) && (
         <View className="-ml-2 rounded-lg bg-primary/10 overflow-hidden">
           {leftIconImage ? (
             <Image
               source={leftIconImage}
-              style={{ width: 36, height: 36, borderRadius: 8 }}
+              style={{ width: 42, height: 42, borderRadius: 8 }}
               resizeMode="cover"
             />
-          ) : (
+          ) : LeftIcon ? (
             <View className="p-2">
-              <SymbolView
-                name={leftIconName!}
+              <LeftIcon
                 size={28}
-                tintColor={theme.foreground}
+                color={theme.foreground}
               />
             </View>
-          )}
+          ) : null}
         </View>
       )}
       <View className={centerAlign ? "items-center" : "flex-1 ml-2"}>
@@ -225,11 +231,11 @@ export function MenuHeader({
             <Text className="text-2xl font-bold text-foreground">{displayTitle}</Text>
             {/* Dropdown indicator arrow */}
             {submenu && submenuItems.length > 0 && (
-              <SymbolView
-                name={isDropdownVisible ? "chevron.up" : "chevron.down"}
-                size={14}
-                tintColor={theme.foreground}
-              />
+              isDropdownVisible ? (
+                <ChevronUp size={14} color={theme.foreground} />
+              ) : (
+                <ChevronDown size={14} color={theme.foreground} />
+              )
             )}
             {/* Daily login loading indicator with spin animation */}
             {dailyLoginState?.isLoading && (
@@ -284,10 +290,9 @@ export function MenuHeader({
                         resizeMode="cover"
                       />
                     ) : item.icon ? (
-                      <SymbolView
-                        name={item.icon}
+                      <item.icon
                         size={18}
-                        tintColor={item.id === selectedSubmenuId ? theme.primary : theme.foreground}
+                        color={item.id === selectedSubmenuId ? theme.primary : theme.foreground}
                       />
                     ) : null}
                     <Text
@@ -296,11 +301,7 @@ export function MenuHeader({
                       {item.label}
                     </Text>
                     {item.id === selectedSubmenuId && (
-                      <SymbolView
-                        name="checkmark"
-                        size={16}
-                        tintColor={theme.primary}
-                      />
+                      <Check size={16} color={theme.primary} />
                     )}
                   </Pressable>
                 ))}
@@ -314,11 +315,7 @@ export function MenuHeader({
           {showStreakInfo && dailyLoginState && !dailyLoginState.isLoading && dailyLoginState.streak !== undefined ? (
             <View className="flex-row items-center gap-2">
               <View className="flex-row items-center gap-1">
-                <SymbolView
-                  name="flame.fill"
-                  size={14}
-                  tintColor="#FF6B35"
-                />
+                <Flame size={14} color="#FF6B35" />
                 <Text className="text-muted-foreground text-sm">
                   {dailyLoginState.streak} day streak
                 </Text>
@@ -332,11 +329,7 @@ export function MenuHeader({
                   }}
                   className="bg-primary px-2 py-0.5 rounded-full flex-row items-center gap-1"
                 >
-                  <SymbolView
-                    name="star.fill"
-                    size={12}
-                    tintColor={theme.primaryForeground}
-                  />
+                  <Star size={12} color={theme.primaryForeground} fill={theme.primaryForeground} />
                   <Text className="text-primary-foreground font-semibold text-xs">
                     +{dailyLoginState.xpEarned} XP
                   </Text>
@@ -351,16 +344,15 @@ export function MenuHeader({
           ) : null}
         </Animated.View>
       </View>
-      {rightIconName && (
+      {RightIcon && (
         <Pressable
           onPress={onRightIconPress}
           className="p-2 mr-0 -mt-2"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <SymbolView
-            name={rightIconName}
+          <RightIcon
             size={24}
-            tintColor={theme.foreground}
+            color={theme.foreground}
           />
         </Pressable>
       )}

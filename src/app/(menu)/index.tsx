@@ -4,6 +4,7 @@ import { useActiveTryouts } from '@/hooks/use-active-tryouts';
 import { useDailyLogin } from '@/hooks/use-daily-login';
 import { router } from 'expo-router';
 import { useAuth } from 'hakgyo-expo-sdk';
+import { Bell, Grid2X2, Book } from 'lucide-react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, View } from 'react-native';
 
@@ -27,12 +28,12 @@ export default function MenuScreen() {
 
   // Convert joined kelas to submenu items with "All" option
   const kelasSubmenuItems = useMemo(() => [
-    { id: 'all', label: 'Semua Kelas', icon: 'square.grid.2x2' as const },
+    { id: 'all', label: 'Semua Kelas', icon: Grid2X2 },
     ...joinedKelas.map(kelas => ({
       id: String(kelas.id),
       label: kelas.title,
       thumbnail: kelas.thumbnail,
-      icon: kelas.thumbnail ? undefined : 'book.closed' as const,
+      icon: kelas.thumbnail ? undefined : Book,
     })),
   ], [joinedKelas]);
 
@@ -81,7 +82,7 @@ export default function MenuScreen() {
           title={selectedKelas?.title ?? 'Hakgyo'}
           subtitle={user?.name ? `안녕하세요, ${user.name}!` : '안녕하세요!'}
           leftIconImage={selectedKelas?.thumbnail ? { uri: selectedKelas.thumbnail } : require('@/assets/images/favicon.png')}
-          rightIconName="bell"
+          rightIcon={Bell}
           onRightIconPress={() => router.push('/notification')}
           dailyLoginState={{
             isLoading,
