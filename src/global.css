@@ -1,27 +1,30 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css";
- 
+
 @import "nativewind/theme";
 
-/* Tailwind theme extensions with dark mode variants */
+/* ============================================ */
+/* AUTO-GENERATED COLORS - DO NOT EDIT MANUALLY */
+/* ============================================ */
+
 @theme {
-  /* Light mode colors (default) */
+  --color-text: #000000;
   --color-background: #ffffff;
   --color-foreground: #000000;
-  /* Card colors */
   --color-card: #ffffff;
   --color-card-foreground: #000000;
+  --color-background-element: #F0F0F3;
+  --color-background-selected: #E0E1E6;
   --color-border: #e5e7eb;
   --color-border-focus: #4b5563;
   --color-input: #f9fafb;
   --color-input-focus: #ffffff;
   --color-muted: #f3f4f6;
   --color-muted-foreground: #6b7280;
+  --color-text-secondary: #60646C;
   --color-destructive: #ef4444;
   --color-ring: #4b5563;
-
-  /* Status colors - subtle tones */
   --color-success: #16a34a;
   --color-success-foreground: #15803d;
   --color-success-muted: #dcfce7;
@@ -34,8 +37,6 @@
   --color-warning: #d97706;
   --color-warning-foreground: #92400e;
   --color-warning-muted: #fffbeb;
-
-  /* Primary, Secondary, Accent colors */
   --color-primary: #374151;
   --color-primary-foreground: #ffffff;
   --color-secondary: #6b7280;
@@ -53,24 +54,25 @@
   --font-serif: Georgia, 'Times New Roman', serif;
 }
 
-/* Dark mode colors using light-dark() function */
+/* Dark mode colors */
 @media (prefers-color-scheme: dark) {
   :root {
+    --color-text: #ffffff;
     --color-background: #000000;
     --color-foreground: #fafafa;
-    /* Card colors */
     --color-card: #141414;
     --color-card-foreground: #fafafa;
+    --color-background-element: #212225;
+    --color-background-selected: #2E3135;
     --color-border: #1a1a1a;
     --color-border-focus: #9ca3af;
     --color-input: #0d0d0d;
     --color-input-focus: #000000;
     --color-muted: #0f0f0f;
     --color-muted-foreground: #737373;
+    --color-text-secondary: #B0B4BA;
     --color-destructive: #ef4444;
     --color-ring: #9ca3af;
-
-    /* Status colors for dark mode - subtle tones */
     --color-success: #4ade80;
     --color-success-foreground: #86efac;
     --color-success-muted: #14532d;
@@ -83,8 +85,6 @@
     --color-warning: #7e5e0f;
     --color-warning-foreground: #fcd34d;
     --color-warning-muted: #a14d1f;
-
-    /* Primary, Secondary, Accent colors for dark mode */
     --color-primary: #d1d5db;
     --color-primary-foreground: #000000;
     --color-secondary: #9ca3af;
@@ -93,4 +93,3 @@
     --color-accent-foreground: #ffffff;
   }
 }
-
