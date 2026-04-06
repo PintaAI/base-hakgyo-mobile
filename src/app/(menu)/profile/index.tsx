@@ -110,7 +110,7 @@ export default function ProfileScreen() {
         }
         contentContainerStyle={{ paddingTop: insets.top + 16, paddingBottom: insets.bottom + 90 }}
       >
-        <View style={{ padding: 16, gap: 12 }}>
+        <View style={{ padding: 8, gap: 12 }}>
           {/* Profile Header Card with Stats */}
           <View
             style={{

@@ -290,10 +290,15 @@ export function MenuHeader({
                         resizeMode="cover"
                       />
                     ) : item.icon ? (
-                      <item.icon
-                        size={18}
-                        color={item.id === selectedSubmenuId ? theme.primary : theme.foreground}
-                      />
+                      <View
+                        className="items-center justify-center"
+                        style={{ width: 28, height: 28, borderRadius: 6, backgroundColor: `${theme.primary}10` }}
+                      >
+                        <item.icon
+                          size={18}
+                          color={item.id === selectedSubmenuId ? theme.primary : theme.foreground}
+                        />
+                      </View>
                     ) : null}
                     <Text
                       className={`text-base flex-1 ${item.id === selectedSubmenuId ? 'text-primary font-semibold' : 'text-foreground'}`}

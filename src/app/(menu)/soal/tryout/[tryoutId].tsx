@@ -1,11 +1,14 @@
-import { MenuHeader } from '@/components/menu-header';
-import { QuizViewer, SubmitAnswer, InitialResultData } from '@/components/quiz-viewer';
+import { Background, MenuHeader } from '@/components';
+import { InitialResultData, QuizViewer, SubmitAnswer } from '@/components/quiz-viewer';
 import { useLocalSearchParams } from 'expo-router';
-import { Soal, Tryout, tryoutApi, TryoutResult, TryoutParticipant,} from 'hakgyo-expo-sdk';
+import { Soal, Tryout, tryoutApi, TryoutParticipant, TryoutResult, } from 'hakgyo-expo-sdk';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 export default function TryoutDetailScreen() {
   const { tryoutId } = useLocalSearchParams<{ tryoutId: string }>();
+  const insets = useSafeAreaInsets();
   const id = Number(tryoutId);
   const [tryout, setTryout] = useState<Tryout | null>(null);
   const [questions, setQuestions] = useState<Soal[]>([]);
@@ -137,16 +140,17 @@ export default function TryoutDetailScreen() {
 
   return (
     <View className="flex-1">
+      <Background />
       {/* Header */}
       <MenuHeader
         title={tryout.nama}
         subtitle={tryout.description ? truncateText(tryout.description) : getSubtitle()}
-        insetEnabled={false}
+        insetEnabled={true}
         centerAlign={true}
       />
 
       {/* Quiz Viewer */}
-      <View className="flex-1 bg-card/10 p-0 border-border overflow-visible">
+      <View className="flex-1 bg-card/10 p-0 border-border overflow-visible" style={{ paddingBottom: insets.bottom }}>
         {checkingResult ? (
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator size="large" className="text-primary" />

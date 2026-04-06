@@ -66,6 +66,10 @@ export default function RootLayout() {
                 presentation: 'formSheet',
                 sheetGrabberVisible: true,
                 sheetAllowedDetents: [0.5, 1.0],
+                sheetExpandsWhenScrolledToEdge: false,
+                ...(Platform.OS === 'android' && {
+                  contentStyle: { backgroundColor: 'transparent' },
+                }),
               }}
             />
             <Stack.Screen
