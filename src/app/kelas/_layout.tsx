@@ -29,7 +29,7 @@ export default function KelasLayout() {
         name="[kelasid]/[materiid]"
         options={{
           title: 'Material',
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen

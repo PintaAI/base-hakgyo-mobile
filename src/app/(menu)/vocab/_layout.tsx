@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 import React from 'react';
+import { Platform } from 'react-native';
 
 export default function VocabLayout() {
   return (
@@ -24,7 +25,11 @@ export default function VocabLayout() {
           presentation: 'formSheet',
           sheetGrabberVisible: true,
           sheetAllowedDetents: [0.5, 1.0],
-          
+          sheetExpandsWhenScrolledToEdge: false,
+          // Make Android window transparent so inner View rounded corners are visible
+          ...(Platform.OS === 'android' && {
+            contentStyle: { backgroundColor: 'transparent' },
+          }),
         }}
       />
     </Stack>

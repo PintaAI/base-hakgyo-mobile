@@ -2,15 +2,18 @@ import { VocabularySet } from 'hakgyo-expo-sdk';
 import { Pressable, Text, View } from 'react-native';
 import { IconRenderer } from './icon-renderer';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Pencil, Trash2 } from 'lucide-react-native';
 
 interface VocabSetCardProps {
   set: VocabularySet;
   onPress: (id: number) => void;
   onLongPress?: (id: number) => void;
+  onEdit?: (set: VocabularySet) => void;
+  onDelete?: (id: number) => void;
   isUserOwned?: boolean;
 }
 
-export function VocabSetCard({ set, onPress, onLongPress, isUserOwned = false }: VocabSetCardProps) {
+export function VocabSetCard({ set, onPress, onLongPress, onEdit, onDelete, isUserOwned = false }: VocabSetCardProps) {
   const itemCount = set.itemCount ?? 0;
   const learnedCount = set.learnedCount ?? 0;
   const progressPercentage = itemCount > 0 ? Math.round((learnedCount / itemCount) * 100) : 0;
@@ -26,9 +29,37 @@ export function VocabSetCard({ set, onPress, onLongPress, isUserOwned = false }:
           <IconRenderer name={set.icon} size={20} />
         </View>
         <View className="flex-1">
-          <Text className="text-lg font-semibold text-foreground" numberOfLines={1}>
-            {set.title}
-          </Text>
+          <View className="flex-row items-center gap-2">
+            <Text className="flex-1 text-lg font-semibold text-foreground" numberOfLines={1}>
+              {set.title}
+            </Text>
+            {isUserOwned && (
+              <View className="flex-row gap-1">
+                {onEdit && (
+                  <Pressable
+                    className="p-1.5 rounded-md bg-primary/10"
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      onEdit(set);
+                    }}
+                  >
+                    <Pencil size={14} color="#6366f1" />
+                  </Pressable>
+                )}
+                {onDelete && (
+                  <Pressable
+                    className="p-1.5 rounded-md bg-destructive/10"
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      onDelete(set.id);
+                    }}
+                  >
+                    <Trash2 size={14} color="#ef4444" />
+                  </Pressable>
+                )}
+              </View>
+            )}
+          </View>
           {isUserOwned ? (
             <View className="self-start px-2 py-0.5 bg-primary/20 rounded mt-1">
               <Text className="text-xs text-primary font-medium">Koleksi Ku</Text>

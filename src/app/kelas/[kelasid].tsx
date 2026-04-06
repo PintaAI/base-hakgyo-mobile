@@ -2,10 +2,11 @@ import FontAwesome from '@react-native-vector-icons/fontawesome-free-solid';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Kelas, kelasApi } from 'hakgyo-expo-sdk';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Background } from '@/components/themed-background';
 import { HtmlRenderer } from '@/components/html-renderer';
+import { Background } from '@/components/themed-background';
 import { useKelas } from '@/contexts/kelas-context';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -29,6 +30,7 @@ export default function KelasDetailScreen() {
   const router = useRouter();
   const { setSelectedKelas } = useKelas();
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const kelasId = Number(kelasid);
   const [kelas, setKelas] = useState<Kelas | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,7 +60,7 @@ export default function KelasDetailScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center">
+      <View className="flex-1 items-center justify-center" style={{ paddingTop: Platform.OS === 'android' ? insets.top : 0 }}>
         <ActivityIndicator size="large" className="text-primary" />
         <Text className="mt-3 text-muted-foreground">Loading class...</Text>
       </View>
@@ -67,7 +69,7 @@ export default function KelasDetailScreen() {
 
   if (error || !kelas) {
     return (
-      <View className="flex-1 p-6 items-center justify-center">
+      <View className="flex-1 p-6 items-center justify-center" style={{ paddingTop: Platform.OS === 'android' ? insets.top : 0 }}>
         <View className="bg-card rounded-2xl border border-border p-6 items-center max-w-xs">
           <View className="w-14 h-14 rounded-full bg-error-muted items-center justify-center">
             <FontAwesome name="exclamation-circle" size={24} color="#ef4444" />
@@ -101,9 +103,13 @@ export default function KelasDetailScreen() {
   };
 
   return (
-    <View className="flex-1">
+    <View className="flex-1" style={{ paddingTop: Platform.OS === 'android' ? insets.top : 0 }}>
       <Background />
-      <ScrollView className="flex-1" contentInsetAdjustmentBehavior="automatic">
+      <ScrollView
+        className="flex-1"
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{ paddingBottom: Platform.OS === 'android' ? insets.bottom + 16 : 16 }}
+      >
         {/* Header Card - Combined with Stats, Author, and Members */}
         <View className="p-4">
           <View className="bg-card rounded-xl border border-border overflow-hidden">

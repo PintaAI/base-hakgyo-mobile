@@ -1,9 +1,9 @@
+import { MenuHeader } from '@/components/menu-header';
+import { QuizViewer } from '@/components/quiz-viewer';
 import { useLocalSearchParams } from 'expo-router';
 import { KoleksiSoal, Soal, soalApi } from 'hakgyo-expo-sdk';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
-import { MenuHeader } from '@/components/menu-header';
-import { QuizViewer } from '@/components/quiz-viewer';
+import { ActivityIndicator, Platform, Pressable, Text, View } from 'react-native';
 
 export default function PracticeDetailScreen() {
   const { practiceId } = useLocalSearchParams<{ practiceId: string }>();
@@ -12,6 +12,10 @@ export default function PracticeDetailScreen() {
   const [questions, setQuestions] = useState<Soal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const sheetStyle = Platform.OS === 'android'
+    ? { borderTopLeftRadius: 16, borderTopRightRadius: 16, overflow: 'hidden' as const }
+    : undefined;
 
   useEffect(() => {
     if (collectionId) {
@@ -43,7 +47,13 @@ export default function PracticeDetailScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center">
+      <View className="flex-1 bg-background items-center justify-center" style={sheetStyle}>
+        {/* Custom grabber for Android */}
+        {Platform.OS === 'android' && (
+          <View className="items-center pt-3 pb-1" collapsable={false}>
+            <View className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+          </View>
+        )}
         <ActivityIndicator size="large" className="text-primary" />
         <Text className="mt-2 text-muted-foreground">Loading question collection...</Text>
       </View>
@@ -52,7 +62,13 @@ export default function PracticeDetailScreen() {
 
   if (error || !collection) {
     return (
-      <View className="flex-1 p-6">
+      <View className="flex-1 bg-background p-6" style={sheetStyle}>
+        {/* Custom grabber for Android */}
+        {Platform.OS === 'android' && (
+          <View className="items-center pt-3 pb-1" collapsable={false}>
+            <View className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+          </View>
+        )}
         <Text className="text-destructive">{error || 'Question collection not found'}</Text>
         <Pressable
           className="mt-4 p-3 bg-primary rounded-lg"
@@ -71,7 +87,13 @@ export default function PracticeDetailScreen() {
   };
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-background" style={sheetStyle}>
+      {/* Custom grabber for Android */}
+      {Platform.OS === 'android' && (
+        <View className="items-center pt-3 pb-1" collapsable={false}>
+          <View className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+        </View>
+      )}
       {/* Header */}
       <MenuHeader
         title={collection.nama}

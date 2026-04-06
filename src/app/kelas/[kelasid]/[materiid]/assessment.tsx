@@ -10,10 +10,12 @@ import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   Pressable,
   Text,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AssessmentQuizViewer, AssessmentResultData } from '@/components/quiz-viewer';
 
@@ -23,6 +25,7 @@ export default function MateriAssessmentScreen() {
     materiid: string;
   }>();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const materiId = Number(materiid);
 
   const [config, setConfig] = useState<MateriAssessmentConfig | null>(null);
@@ -102,7 +105,7 @@ export default function MateriAssessmentScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center">
+      <View className="flex-1 bg-background items-center justify-center" style={{ paddingTop: Platform.OS === 'android' ? insets.top : 0 }}>
         <ActivityIndicator size="large" className="text-primary" />
         <Text className="mt-3 text-muted-foreground">Loading assessment...</Text>
       </View>
@@ -111,7 +114,7 @@ export default function MateriAssessmentScreen() {
 
   if (error || !config) {
     return (
-      <View className="flex-1 p-6 items-center justify-center">
+      <View className="flex-1 bg-background p-6 items-center justify-center" style={{ paddingTop: Platform.OS === 'android' ? insets.top : 0 }}>
         <View className="bg-card rounded-2xl border border-border p-6 items-center max-w-xs">
           <View className="w-14 h-14 rounded-full bg-error-muted items-center justify-center">
             <FontAwesome name="exclamation-circle" size={24} color="#ef4444" />
@@ -154,7 +157,7 @@ export default function MateriAssessmentScreen() {
   }
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-background" style={{ paddingTop: Platform.OS === 'android' ? insets.top : 0 }}>
       {/* Quiz Viewer */}
       <AssessmentQuizViewer
         questions={config.questions}

@@ -2,12 +2,14 @@ import { useTheme } from '@/hooks/use-theme';
 import { gamificationApi, Soal, soalApi, useAuth } from 'hakgyo-expo-sdk';
 import { AlertCircle, BookOpen, ChevronRight } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Modal, Pressable, SafeAreaView, StatusBar, Text, useColorScheme, View } from 'react-native';
+import { Modal, Pressable, StatusBar, Text, useColorScheme, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { QuizViewer } from './quiz-viewer';
 import { DailySoalSkeleton } from './skeletons';
 
 export function DailySoal() {
   const { user, refreshSession } = useAuth();
+  const insets = useSafeAreaInsets();
   const [questions, setQuestions] = useState<Soal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -216,12 +218,13 @@ export function DailySoal() {
         presentationStyle="pageSheet"
         onRequestClose={handleCloseModal}
       >
-        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+        <View style={{ flex: 1, backgroundColor: theme.background }}>
           <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
           <View
             style={{
               flex: 1,
               backgroundColor: theme.card,
+              paddingTop: insets.top,
             }}
           >
             {/* Header */}
@@ -336,7 +339,7 @@ export function DailySoal() {
               )}
             </View>
           </View>
-        </SafeAreaView>
+        </View>
       </Modal>
     </>
   );

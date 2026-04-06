@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Kelas, userApi, useSession } from 'hakgyo-expo-sdk';
+import { Kelas, kelasApi, userApi, useSession } from 'hakgyo-expo-sdk';
 import React, { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
 const SELECTED_KELAS_KEY = 'hakgyo_selected_kelas';
@@ -20,6 +20,8 @@ interface KelasContextValue {
   refreshJoinedKelas: () => Promise<void>;
   /** Clear selected kelas */
   clearSelectedKelas: () => void;
+  /** Unenroll from a kelas */
+  unenrollKelas: (kelasId: number) => Promise<{ success: boolean; error?: string }>;
 }
 
 const KelasContext = createContext<KelasContextValue | undefined>(undefined);
@@ -111,6 +113,28 @@ export function KelasProvider({ children }: KelasProviderProps) {
     await AsyncStorage.removeItem(SELECTED_KELAS_KEY);
   }, []);
 
+  // Unenroll from a kelas
+  const unenrollKelas = useCallback(async (kelasId: number): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const response = await kelasApi.unenroll(kelasId);
+      if (response.success) {
+        // Remove the unenrolled kelas from the list
+        setJoinedKelas(prev => prev.filter(k => k.id !== kelasId));
+        // If the unenrolled kelas was selected, clear the selection
+        if (selectedKelas?.id === kelasId) {
+          setSelectedKelasState(null);
+          await AsyncStorage.removeItem(SELECTED_KELAS_KEY);
+        }
+        return { success: true };
+      } else {
+        return { success: false, error: response.error || 'Failed to unenroll from class' };
+      }
+    } catch (err) {
+      console.error('Failed to unenroll from kelas:', err);
+      return { success: false, error: 'Failed to unenroll from class' };
+    }
+  }, [selectedKelas]);
+
   // Fetch joined kelas when user authenticates
   useEffect(() => {
     if (user?.id && !sessionLoading) {
@@ -129,6 +153,7 @@ export function KelasProvider({ children }: KelasProviderProps) {
     setSelectedKelas,
     refreshJoinedKelas,
     clearSelectedKelas,
+    unenrollKelas,
   };
 
   return (

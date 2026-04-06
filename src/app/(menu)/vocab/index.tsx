@@ -18,12 +18,16 @@ export default function VocabScreen() {
   const [vocabSets, setVocabSets] = useState<VocabularySet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isAdding, setIsAdding] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [newDescription, setNewDescription] = useState('');
-  const [adding, setAdding] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const insets = useSafeAreaInsets();
+  
+  // Unified form state for create/edit
+  const [formVisible, setFormVisible] = useState(false);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+  const [editingSet, setEditingSet] = useState<VocabularySet | null>(null);
+  const [formTitle, setFormTitle] = useState('');
+  const [formDescription, setFormDescription] = useState('');
+  const [formSubmitting, setFormSubmitting] = useState(false);
 
   const fetchVocabSets = useCallback(async () => {
     if (!user?.id) {
@@ -64,6 +68,10 @@ export default function VocabScreen() {
     try {
       await vocabularyApi.deleteSet(id);
       setVocabSets((prev) => prev.filter((set) => set.id !== id));
+      // Also close form if deleting the set being edited
+      if (editingSet?.id === id) {
+        closeForm();
+      }
     } catch (err) {
       Alert.alert('Error', 'Failed to delete vocabulary set');
     }
@@ -84,31 +92,75 @@ export default function VocabScreen() {
     );
   };
 
-  const handleAddSet = async () => {
-    if (!newTitle.trim() || !user?.id) return;
+  // Open form for creating new set
+  const openCreateForm = () => {
+    setFormMode('create');
+    setEditingSet(null);
+    setFormTitle('');
+    setFormDescription('');
+    setFormVisible(true);
+  };
+
+  // Open form for editing existing set
+  const openEditForm = (set: VocabularySet) => {
+    setFormMode('edit');
+    setEditingSet(set);
+    setFormTitle(set.title);
+    setFormDescription(set.description || '');
+    setFormVisible(true);
+  };
+
+  // Close form and reset state
+  const closeForm = () => {
+    setFormVisible(false);
+    setFormMode('create');
+    setEditingSet(null);
+    setFormTitle('');
+    setFormDescription('');
+  };
+
+  // Handle form submission (create or update)
+  const handleFormSubmit = async () => {
+    if (!formTitle.trim()) return;
+    
+    // For create mode, require user
+    if (formMode === 'create' && !user?.id) return;
 
     try {
-      setAdding(true);
-      const body = {
-        title: newTitle.trim(),
-        description: newDescription.trim() || undefined,
-        isPublic: false,
-        isDraft: false,
-        userId: user.id,
-      };
-      console.log('Creating vocab set with body:', JSON.stringify(body, null, 2));
-      const response = await vocabularyApi.createSet(body);
+      setFormSubmitting(true);
 
-      if (response.data) {
-        setVocabSets([response.data, ...vocabSets]);
-        setNewTitle('');
-        setNewDescription('');
-        setIsAdding(false);
+      if (formMode === 'create') {
+        // Create new set
+        const response = await vocabularyApi.createSet({
+          title: formTitle.trim(),
+          description: formDescription.trim() || undefined,
+          isPublic: false,
+          isDraft: false,
+          userId: user!.id,
+        });
+
+        if (response.data) {
+          setVocabSets([response.data, ...vocabSets]);
+          closeForm();
+        }
+      } else if (formMode === 'edit' && editingSet) {
+        // Update existing set
+        const response = await vocabularyApi.updateSet(editingSet.id, {
+          title: formTitle.trim(),
+          description: formDescription.trim() || undefined,
+        });
+
+        if (response.data) {
+          setVocabSets((prev) =>
+            prev.map((set) => (set.id === editingSet.id ? response.data! : set))
+          );
+          closeForm();
+        }
       }
     } catch (err) {
-      Alert.alert('Error', 'Failed to create vocabulary set');
+      Alert.alert('Error', formMode === 'create' ? 'Failed to create vocabulary set' : 'Failed to update vocabulary set');
     } finally {
-      setAdding(false);
+      setFormSubmitting(false);
     }
   };
 
@@ -127,46 +179,49 @@ export default function VocabScreen() {
           onRightIconPress={() => router.push('/game')}
         />
 
-        {/* Add Vocab Set Form */}
+        {/* Unified Vocab Set Form (Create/Edit) */}
         {user?.id && (
           <View className="px-2 pt-2" collapsable={false}>
-            {isAdding ? (
-              <View className="p-4 bg-card rounded-lg border border-border" collapsable={false}>
-                <Text className="text-sm font-medium text-foreground mb-3">Create New Vocabulary Set</Text>
+            {formVisible ? (
+              <View 
+                className={`p-4 bg-card rounded-lg border ${formMode === 'edit' ? 'border-primary/50' : 'border-border'}`} 
+                collapsable={false}
+              >
+                <Text className="text-sm font-medium text-foreground mb-3">
+                  {formMode === 'create' ? 'Create New Vocabulary Set' : 'Edit Vocabulary Set'}
+                </Text>
                 <TextInput
                   className="p-3 bg-background rounded-lg border border-border text-foreground mb-2"
                   placeholder="Title"
                   placeholderTextColor="#9CA3AF"
-                  value={newTitle}
-                  onChangeText={setNewTitle}
+                  value={formTitle}
+                  onChangeText={setFormTitle}
                   returnKeyType="next"
                 />
                 <TextInput
                   className="p-3 bg-background rounded-lg border border-border text-foreground mb-3"
                   placeholder="Description (optional)"
                   placeholderTextColor="#9CA3AF"
-                  value={newDescription}
-                  onChangeText={setNewDescription}
+                  value={formDescription}
+                  onChangeText={setFormDescription}
                   returnKeyType="done"
                 />
                 <View className="flex-row gap-2" collapsable={false}>
                   <Pressable
                     className="flex-1 p-3 bg-muted rounded-lg"
-                    onPress={() => {
-                      setIsAdding(false);
-                      setNewTitle('');
-                      setNewDescription('');
-                    }}
+                    onPress={closeForm}
                   >
                     <Text className="text-center text-muted-foreground">Cancel</Text>
                   </Pressable>
                   <Pressable
-                    className={`flex-1 p-3 rounded-lg ${adding || !newTitle.trim() ? 'bg-primary/50' : 'bg-primary'}`}
-                    onPress={handleAddSet}
-                    disabled={adding || !newTitle.trim()}
+                    className={`flex-1 p-3 rounded-lg ${formSubmitting || !formTitle.trim() ? 'bg-primary/50' : 'bg-primary'}`}
+                    onPress={handleFormSubmit}
+                    disabled={formSubmitting || !formTitle.trim()}
                   >
                     <Text className="text-center text-primary-foreground">
-                      {adding ? 'Creating...' : 'Create'}
+                      {formSubmitting 
+                        ? (formMode === 'create' ? 'Creating...' : 'Saving...') 
+                        : (formMode === 'create' ? 'Create' : 'Save')}
                     </Text>
                   </Pressable>
                 </View>
@@ -174,7 +229,7 @@ export default function VocabScreen() {
             ) : (
               <Pressable
                 className="p-3 bg-primary/10 rounded-lg border border-dashed border-primary/30"
-                onPress={() => setIsAdding(true)}
+                onPress={openCreateForm}
               >
                 <Text className="text-center text-primary font-medium">+ Tambah Koleksi Kosa-kata</Text>
               </Pressable>
@@ -231,6 +286,8 @@ export default function VocabScreen() {
                 set={set}
                 onPress={handlePress}
                 onLongPress={handleLongPress}
+                onEdit={openEditForm}
+                onDelete={handleLongPress}
                 isUserOwned={set.userId === user?.id}
               />
             ))

@@ -5,14 +5,16 @@ import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   Pressable,
   ScrollView,
   Text,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Background } from '@/components/themed-background';
 import { HtmlRenderer } from '@/components/html-renderer';
+import { Background } from '@/components/themed-background';
 
 export default function MateriDetailScreen() {
   const { kelasid, materiid } = useLocalSearchParams<{
@@ -20,6 +22,7 @@ export default function MateriDetailScreen() {
     materiid: string;
   }>();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const kelasId = Number(kelasid);
   const materiId = Number(materiid);
 
@@ -93,7 +96,7 @@ export default function MateriDetailScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1">
+      <View className="flex-1" style={{ paddingTop: Platform.OS === 'android' ? insets.top : 0 }}>
         <Background />
         <View className="flex-1 items-center justify-center">
           <View className="bg-card rounded-2xl border border-border p-6 items-center">
@@ -107,7 +110,7 @@ export default function MateriDetailScreen() {
 
   if (error || !materi) {
     return (
-      <View className="flex-1">
+      <View className="flex-1" style={{ paddingTop: Platform.OS === 'android' ? insets.top : 0 }}>
         <Background />
         <View className="flex-1 p-6 items-center justify-center">
           <View className="bg-card rounded-2xl border border-border p-6 items-center max-w-xs">
@@ -135,9 +138,13 @@ export default function MateriDetailScreen() {
   }
 
   return (
-    <View className="flex-1">
+    <View className="flex-1" style={{ paddingTop: Platform.OS === 'android' ? insets.top : 0 }}>
       <Background />
-      <ScrollView className="flex-1" contentInsetAdjustmentBehavior="automatic">
+      <ScrollView
+        className="flex-1"
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{ paddingBottom: Platform.OS === 'android' ? insets.bottom + 16 : 16 }}
+      >
         <View className="p-4 pb-8">
           {/* Header Card - Matching kelasid design */}
           <View className="bg-card rounded-xl border border-border overflow-hidden">

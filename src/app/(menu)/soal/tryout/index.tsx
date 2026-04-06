@@ -1,11 +1,13 @@
-import { TryoutCard } from '@/components';
+import { Background, TryoutCard } from '@/components';
 import { router } from 'expo-router';
 import { Tryout, tryoutApi, useAuth } from 'hakgyo-expo-sdk';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TryoutScreen() {
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const [tryouts, setTryouts] = useState<Tryout[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,13 +42,14 @@ export default function TryoutScreen() {
 
   return (
     <View className="flex-1">
-      <View className="px-4 pt-4 pb-2 items-center">
+      <Background />
+      <View className="px-4 pt-4 pb-2 items-center" style={{ paddingTop: insets.top + 16 }}>
         <Text className="text-2xl font-bold text-foreground">Tryout</Text>
       </View>
       <ScrollView
         className="flex-1 p-3"
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{ gap: 5 }}
+        contentContainerStyle={{ gap: 5, paddingBottom: insets.bottom + 100 }}
       >
         {loading ? (
           <ActivityIndicator size="large" className="mt-8" />

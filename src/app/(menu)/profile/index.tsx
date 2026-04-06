@@ -9,16 +9,20 @@ import { JoinedKelasList } from '@/components/joined-kelas-list';
 import { Background } from '@/components/themed-background';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useKelas } from '@/contexts/kelas-context';
+import { usePushNotifications } from '@/hooks/use-notifications';
 import { useTheme } from '@/hooks/use-theme';
 
 export default function ProfileScreen() {
   const { user, signOut, refreshSession } = useAuth();
-  const { joinedKelas, isLoading, error, refreshJoinedKelas } = useKelas();
+  const { joinedKelas, isLoading, error, refreshJoinedKelas, unenrollKelas } = useKelas();
+  const { unregister } = usePushNotifications();
   const [refreshing, setRefreshing] = useState(false);
   const insets = useSafeAreaInsets();
 
   const handleSignOut = async () => {
     try {
+      // Unregister push notifications before signing out
+      await unregister();
       await signOut();
       router.push('/auth');
     } catch (error) {
@@ -106,7 +110,7 @@ export default function ProfileScreen() {
         }
         contentContainerStyle={{ paddingTop: insets.top + 16, paddingBottom: insets.bottom + 90 }}
       >
-        <View style={{ padding: 16, gap: 12 }}>
+        <View style={{ padding: 8, gap: 12 }}>
           {/* Profile Header Card with Stats */}
           <View
             style={{
@@ -253,6 +257,7 @@ export default function ProfileScreen() {
             joinedKelas={joinedKelas}
             isLoading={isLoading}
             error={error}
+            onUnenroll={unenrollKelas}
           />
 
           {/* Login/Logout Button */}
