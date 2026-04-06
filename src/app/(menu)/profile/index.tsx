@@ -14,7 +14,7 @@ import { useTheme } from '@/hooks/use-theme';
 
 export default function ProfileScreen() {
   const { user, signOut, refreshSession } = useAuth();
-  const { joinedKelas, isLoading, error, refreshJoinedKelas } = useKelas();
+  const { joinedKelas, isLoading, error, refreshJoinedKelas, unenrollKelas } = useKelas();
   const { unregister } = usePushNotifications();
   const [refreshing, setRefreshing] = useState(false);
   const insets = useSafeAreaInsets();
@@ -257,6 +257,7 @@ export default function ProfileScreen() {
             joinedKelas={joinedKelas}
             isLoading={isLoading}
             error={error}
+            onUnenroll={unenrollKelas}
           />
 
           {/* Login/Logout Button */}
