@@ -1,5 +1,6 @@
 import { KelasProvider } from '@/contexts/kelas-context';
 import { useEASUpdate } from '@/hooks/use-eas-update';
+import { usePushNotifications } from '@/hooks/use-notifications';
 import { BASE_URL } from '@/lib/config';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
